@@ -1,8 +1,7 @@
 # gasevents
 
-## Build
+## Compile to Jar
 ```bash
 ./gradlew shadowJar
 ```
-
-Author: BotMert
+File compiles to: ./build/libs/
