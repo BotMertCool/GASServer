@@ -17,11 +17,10 @@ import java.util.UUID;
 
 public class NametagEntity extends Entity {
 
-    public static final Tag<NametagEntity> NAMETAG_TAG = Tag.Transient("nametag"); // for deleting the entity on leave
+    // Custom nametags in minestom https://gist.github.com/cosrnic/14508868147c347ccfdc15fce09fb8d8
 
-
+    public static final Tag<NametagEntity> NAMETAG_TAG = Tag.Transient("nametag");
     private final UUID owner;
-    @Setter private boolean sneaking;
 
     public NametagEntity(Player player) {
         super(EntityType.INTERACTION);
@@ -52,15 +51,6 @@ public class NametagEntity extends Entity {
         if (viewer.getUuid().equals(this.owner)) {
             return;
         }
-
-        if (this.sneaking)
-            return;
-
-        // heheheh
-        //var p = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.owner);
-
-        //if (p != null && p.isSneaking())
-        //    return;
 
         super.updateNewViewer(viewer);
 
