@@ -33,7 +33,7 @@ public class MongoHandler implements Closeable {
     }
 
     public Document getProfileBySyncCode(String syncCode) {
-        return this.profiles.find(Filters.eq("syncCode", String.valueOf(syncCode))).first();
+        return this.profiles.find(Filters.eq("syncCode", syncCode)).first();
     }
 
     public void upsertProfile(UUID uuid, Document document) {
@@ -47,11 +47,11 @@ public class MongoHandler implements Closeable {
     }
 
     public MongoCursor<Document> getPunishmentsByTarget(UUID uuid) {
-        return this.punishments.find(Filters.eq("uuid", String.valueOf(uuid))).iterator();
+        return this.punishments.find(Filters.eq("uuid_target", String.valueOf(uuid))).iterator();
     }
 
     public void upsertPunishment(UUID uuid, Document document) {
-        this.punishments.replaceOne(Filters.eq("target_uuid", String.valueOf(uuid)), document,
+        this.punishments.replaceOne(Filters.eq("uuid", String.valueOf(uuid)), document,
             new ReplaceOptions().upsert(true)
         );
     }

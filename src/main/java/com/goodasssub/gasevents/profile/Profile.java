@@ -79,12 +79,12 @@ public class Profile {
         this.checkAndUpdateRank();
     }
 
-    private void save() {
+    public void save() {
         Document document = Main.getInstance().getMongoHandler().getProfile(this.uuid);
 
         if (document == null) document = new Document();
 
-        document.put("uuid", this.uuid);
+        document.put("uuid", String.valueOf(uuid));
         document.put("name", this.name);
         document.put("ipAddress", this.ipAddress);
         document.put("rank", this.rank);

@@ -46,13 +46,13 @@ public class AntiCheat {
             violations++;
         }*/
 
-        Audiences.players().sendMessage(Component.newline());
-        flags.stream()
-            .filter((flag) -> flag.getCheckName().equals(checkName))
-            .sorted(Comparator.comparingLong(Flag::getTimestamp).reversed())
-            .toList()
-            .forEach((f) -> Audiences.players().sendMessage(Component.text(f.getCheckName() + " " + f.getTimestamp())));
-        Audiences.players().sendMessage(Component.newline());
+//        Audiences.players().sendMessage(Component.newline());
+//        flags.stream()
+//            .filter((flag) -> flag.getCheckName().equals(checkName))
+//            .sorted(Comparator.comparingLong(Flag::getTimestamp).reversed())
+//            .toList()
+//            .forEach((f) -> Audiences.players().sendMessage(Component.text(f.getCheckName() + " " + f.getTimestamp())));
+//        Audiences.players().sendMessage(Component.newline());
 
         if (checkName.equals("BasicSpeed") ) {
             if (violations % 3 != 0)
@@ -74,6 +74,7 @@ public class AntiCheat {
                 checksFlagged = new ArrayList<>();
             }
             checksFlagged.add(new Flag(event.checkName(), System.currentTimeMillis()));
+
 
             flagsList.put(target.getUuid(), checksFlagged);
             int flags = getFlags(event.checkName(), target.getUuid());

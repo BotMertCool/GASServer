@@ -25,6 +25,7 @@ import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.anvil.AnvilLoader;
@@ -77,6 +78,8 @@ public class Main {
         System.setProperty("minestom.entity-view-distance", config.getViewDistance());
 
         MinecraftServer minecraftServer = MinecraftServer.init();
+
+
         CommandManager commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new GamemodeCommand());
         commandManager.register(new PlayersCommand());
@@ -105,6 +108,8 @@ public class Main {
         instanceContainer.setTime(18000);
 
         MinecraftServer.getBenchmarkManager().enable(Duration.of(5, TimeUnit.SECOND));
+        MinecraftServer.setCompressionThreshold(0);
+
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
 
@@ -135,6 +140,8 @@ public class Main {
         } else {
             logger.info("Mojang auth disabled.");
         }
+
+        //BungeeCordProxy.enable();
 
         mongoHandler = new MongoHandler(config.getMongoUri(), config.getMongoDatabase());
         discordBot = new DiscordBot(config.getDiscordToken());

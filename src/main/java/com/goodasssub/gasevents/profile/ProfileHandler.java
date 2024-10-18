@@ -20,9 +20,14 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
+import net.minestom.server.listener.preplay.LoginListener;
+import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.network.player.PlayerSocketConnection;
 import net.minestom.server.utils.time.TimeUnit;
 
+import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class ProfileHandler {
@@ -74,14 +79,43 @@ public class ProfileHandler {
             //TODO: move to prevention.
             event.setCancelled(true);
         });
+        eventNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
+            Player player = event.getPlayer();
+            Profile profile = Profile.fromUuid(player.getUuid());
+
+            if (profile.getIpAddress() == null) {
+                Main.getInstance().getLogger().info(player.getPlayerConnection().getRemoteAddress().toString());
+                Main.getInstance().getLogger().info(player.getPlayerConnection().getIdentifier());
+                //profile.setIpAddress(player.getPlayerConnection().getRemoteAddress());
+            }
+
+            String profileName = profile.getName();
+            if (profileName == null || !profileName.equals(player.getUsername())) {
+                profile.setName(player.getUsername());
+                profile.save();
+            }
+
+            if (profile.getDiscordId() != null) {
+                profile.checkAndUpdateRank();
+            }
+            //player.sendMessage((System.currentTimeMillis() - spawnStartTime) + "ms");
+
+            // TODO: use permissions
+            if (profile.getRank().equals(Rank.OWNER)) {
+                player.setPermissionLevel(4);
+            }
+            //event.getPlayer().getPlayerConnection();
+        });
+
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
             event.setSpawningInstance(spawnInstance);
+
             player.setRespawnPoint(new Pos(434.5, 4.5, 1036.5, -90, -.5f));
         });
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
-
+            
             VisibilityItem.playerVisibilityMap.forEach((uuid, bool) -> {
                 Player viewer = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
                 if (viewer != null) {
@@ -102,36 +136,21 @@ public class ProfileHandler {
                 <gray>%s</gray>""".formatted(bar, bar);
 
             player.sendMessage(instance.getMiniMessage().deserialize(joinMessage));
+            CompletableFuture.runAsync(() -> {
+                Profile profile = Profile.fromUuid(player.getUuid());
 
-            long profileStartTime = System.currentTimeMillis();
-            Profile profile = Profile.fromUuid(player.getUuid());
+                if (profile.getDiscordId() == null) {
+                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
+                        "You can do this with the /sync command.", NamedTextColor.RED));
+                    return;
+                }
 
-            if (profile == null) {
-                
-                instance.getLogger().error("Error profile null: {}", player.getUsername());
-                player.sendMessage(Component.text("A fatal error has occurred whilst loading your profile.", NamedTextColor.RED));
-                return;
-            }
+                Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
+                    .append(Component.text(player.getUsername()));
 
-            if (profile.getDiscordId() == null) {
-                player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
-                    "You can do this with the /sync command.", NamedTextColor.RED));
-            } else {
-                profile.checkAndUpdateRank();
-            }
-
-            Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
-                .append(Component.text(player.getUsername()));
-
-            player.setDisplayName(playerName);
-            new NametagEntity(player);
-
-            player.sendMessage((System.currentTimeMillis() - profileStartTime) + "ms");
-
-            // TODO: use permissions?
-            if (profile.getRank().equals(Rank.OWNER)) {
-                player.setPermissionLevel(4);
-            }
+                player.setDisplayName(playerName);
+                new NametagEntity(player);
+            });
         });
         eventNode.addListener(PlayerDisconnectEvent.class, event -> {
             Player player = event.getPlayer();
