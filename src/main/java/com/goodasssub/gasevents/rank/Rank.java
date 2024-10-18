@@ -1,4 +1,4 @@
-package com.goodasssub.gasevents.profile;
+package com.goodasssub.gasevents.rank;
 
 import lombok.Getter;
 
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Getter
 public enum Rank {
 
-    // TODO: sum other way
+    // TODO: Store ranks in mongodb
     OWNER(
         "Owner",
         "1209578826573549588",

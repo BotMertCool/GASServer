@@ -2,118 +2,132 @@ package com.goodasssub.gasevents.profile;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
+import com.goodasssub.gasevents.profile.punishments.Punishment;
+import com.goodasssub.gasevents.rank.Rank;
+import com.goodasssub.gasevents.util.SyncUtil;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.bson.Document;
 
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-@Getter
 public class Profile {
-    private static final ConcurrentMap<String, Profile> profiles = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, Profile> onlineProfiles = new ConcurrentHashMap<>();
+    @Getter private final static Map<UUID, Profile> cache = new ConcurrentHashMap<>();
 
-    private final String uniqueId;
-    private Rank rank;
-    private String discordId;
-    private String syncCode;
+    @Getter private final UUID uuid;
+    @Getter @Setter private String name;
+    @Getter @Setter private String ipAddress;
+    @Getter private Rank rank;
+    @Getter @Setter private List<Punishment> punishments;
+    @Getter private String discordId;
+    @Getter @Setter private String syncCode;
 
-    public Profile(String uniqueId, Rank rank, String discordId, String syncCode) {
-        this.uniqueId = uniqueId;
-        this.rank = rank;
-        this.discordId = discordId;
-        this.syncCode = syncCode;
+    public Profile(UUID uuid) {
+        this.uuid = uuid;
+        this.name = null;
+        this.ipAddress = null;
+        this.rank = Rank.DEFAULT;
+        this.punishments = new ArrayList<>();
+        this.discordId = null;
+        this.syncCode = null;
+
+        this.load();
     }
 
-    public static Profile getOrCreateProfileByUUID(String uniqueId) {
-        return profiles.computeIfAbsent(uniqueId, Profile::loadOrCreateProfile);
-    }
+    public void load() {
+        Document document = Main.getInstance().getMongoHandler().getProfile(this.uuid);
 
-    private static Profile loadOrCreateProfile(String uniqueId) {
-        try {
-            MongoCollection<Document> profilesCollection = Main.getInstance().getMongoDB().profilesCollection;
-            Document query = new Document("uniqueId", uniqueId);
-            Document profileDocument = profilesCollection.find(query).first();
-
-            if (profileDocument == null) {
-                profileDocument = new Document("uniqueId", uniqueId)
-                    .append("rank", Rank.DEFAULT.getName())
-                    .append("discordId", null)
-                    .append("syncCode", generateSyncCode());
-
-                profilesCollection.insertOne(profileDocument);
-            }
-
-            return new Profile(
-                profileDocument.getString("uniqueId"),
-                Rank.getRankByName(profileDocument.getString("rank")),
-                profileDocument.getString("discordId"),
-                profileDocument.getString("syncCode")
-            );
-        } catch (MongoException e) {
-            throw new RuntimeException("Could not load profile", e);
-        }
-    }
-
-    public static Profile getProfileBySyncCode(String syncCode) {
-        try {
-            MongoCollection<Document> profilesCollection = Main.getInstance().getMongoDB().profilesCollection;
-            Document query = new Document("syncCode", syncCode);
-            Document profileDocument = profilesCollection.find(query).first();
-
-            if (profileDocument == null) return null;
-
-            Profile profile = new Profile(
-                profileDocument.getString("uniqueId"),
-                Rank.getRankByName(profileDocument.getString("rank")),
-                profileDocument.getString("discordId"),
-                profileDocument.getString("syncCode")
-            );
-
-            profiles.put(profile.getUniqueId(), profile);
-            return profile;
-        } catch (MongoException e) {
-            Main.getInstance().getLogger().error("An error occurred: {}", e.getMessage());
+        if (document == null) {
+            this.save();
+            return;
         }
 
-        return null;
+        if (this.getName() == null) {
+            this.name = document.getString("name");
+        }
+
+        this.ipAddress = document.getString("ipAddress");
+
+        this.rank = Rank.DEFAULT;
+        this.discordId = document.getString("discordId");
+        this.syncCode = document.getString("syncCode");
+
+        if (this.getRank() == null) {
+            this.name = document.getString("name");
+        }
+
+        var mongo = Main.getInstance().getMongoHandler();
+
+        try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(this.getUuid())) {
+            cursor.forEachRemaining(punishmentDocument -> {
+                Punishment punishment = new Punishment();
+                //punishment.load(punishmentDocument);
+
+                this.punishments.add(punishment);
+            });
+        }
+        
+        this.checkAndUpdateRank();
+    }
+
+    private void save() {
+        Document document = Main.getInstance().getMongoHandler().getProfile(this.uuid);
+
+        if (document == null) document = new Document();
+
+        document.put("uuid", this.uuid);
+        document.put("name", this.name);
+        document.put("ipAddress", this.ipAddress);
+        document.put("rank", this.rank);
+        document.put("punishments", this.punishments);
+        document.put("discordId", this.discordId);
+        document.put("syncCode", this.syncCode);
+
+        Main.getInstance().getMongoHandler().upsertProfile(this.uuid, document);
+    }
+
+    public static Profile fromUuid(UUID uuid) {
+        if (Profile.getCache().containsKey(uuid)) {
+            return Profile.getCache().get(uuid);
+        }
+
+        return new Profile(uuid);
+    }
+
+    public static Profile fromSyncCode(String syncCode) {
+        Document document = Main.getInstance().getMongoHandler().getProfileBySyncCode(syncCode);
+
+        if (document == null) return null;
+
+        UUID uuid = UUID.fromString(document.getString("uuid"));
+
+        if (Profile.getCache().containsKey(uuid)) {
+            return Profile.getCache().get(uuid);
+        }
+
+        return new Profile(uuid);
     }
 
     public void setDiscordId(String discordId) {
-        MongoCollection<Document> profilesCollection = Main.getInstance().getMongoDB().profilesCollection;
-
         this.discordId = discordId;
         this.syncCode = null;
 
-        Document query = new Document("uniqueId", this.uniqueId);
-        Document update = new Document("$set", new Document("discordId", this.discordId)
-            .append("syncCode", null));
-
-        profilesCollection.updateOne(query, update);
-        profiles.put(this.uniqueId, this);
+        this.save();
     }
 
     public void setRank(Rank rank) {
-        MongoCollection<Document> profilesCollection = Main.getInstance().getMongoDB().profilesCollection;
-
         this.rank = rank;
 
-        Document query = new Document("uniqueId", this.uniqueId);
-        Document update = new Document("$set", new Document("rank", this.rank.getName()));
-
-        profilesCollection.updateOne(query, update);
-        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(this.uniqueId));
-
+        Player player = this.getPlayer();
         if (player != null) {
             Component playerName = Main.getInstance().getMiniMessage().deserialize(String.format("<%s>", rank.getColor()))
                 .append(Component.text(player.getUsername()));
@@ -121,7 +135,7 @@ public class Profile {
             player.setDisplayName(playerName);
         }
 
-        profiles.put(this.uniqueId, this);
+        this.save();
     }
 
     public void checkAndUpdateRank() {
@@ -151,7 +165,7 @@ public class Profile {
 
         if (newRank == this.rank) return;
 
-        setRank(newRank);
+        this.setRank(newRank);
     }
 
     public Component getRankPrefix() {
@@ -159,7 +173,7 @@ public class Profile {
     }
 
     public Component getFormattedName() {
-        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(this.uniqueId));
+        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.uuid);
         if (player == null) {
             return Component.text("A fatal error has occured.");
         }
@@ -174,18 +188,8 @@ public class Profile {
 
     }
 
-    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz1234567890";
-    private static final SecureRandom RANDOM = new SecureRandom();
-
-    private static String generateSyncCode() {
-        final int LENGTH = 6;
-
-        StringBuilder result = new StringBuilder(LENGTH);
-        for (int i = 0; i < LENGTH; i++) {
-            int index = RANDOM.nextInt(CHARACTERS.length());
-            result.append(CHARACTERS.charAt(index));
-        }
-        return result.toString();
+    public Player getPlayer() {
+        // make so can get offline?
+        return MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.uuid);
     }
-
 }

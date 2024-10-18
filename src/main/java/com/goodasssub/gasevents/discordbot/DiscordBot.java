@@ -52,7 +52,7 @@ public class DiscordBot {
                 if (author.isBot()) return;
 
                 String syncCode = message.getContent();
-                Profile profile = Profile.getProfileBySyncCode(syncCode);
+                Profile profile = Profile.fromSyncCode(syncCode);
 
                 if (profile == null) {
                     message.getChannel()
@@ -78,8 +78,7 @@ public class DiscordBot {
                         .formatted(author.getId().asString())))
                     .subscribe();
 
-                UUID playerUuid = UUID.fromString(profile.getUniqueId());
-                Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(playerUuid);
+                Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(profile.getUuid());
 
                 if (player == null) return;
 

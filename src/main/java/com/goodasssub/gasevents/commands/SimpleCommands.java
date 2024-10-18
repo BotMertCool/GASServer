@@ -2,7 +2,7 @@ package com.goodasssub.gasevents.commands;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
-import com.goodasssub.gasevents.profile.Rank;
+import com.goodasssub.gasevents.rank.Rank;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.TPSUtil;
 import net.kyori.adventure.text.Component;
@@ -80,7 +80,7 @@ public class SimpleCommands {
 
             switch (testString.toLowerCase()) {
                 case "rank": {
-                    Profile profile = Profile.getOrCreateProfileByUUID(String.valueOf(player.getUuid()));
+                    Profile profile = Profile.fromUuid(player.getUuid());
                     argString = argString.toUpperCase();
 
                     Rank rank = Rank.valueOf(argString);
@@ -95,7 +95,7 @@ public class SimpleCommands {
                     break;
                 }
                 case "discordid": {
-                    Profile profile = Profile.getOrCreateProfileByUUID(String.valueOf(player.getUuid()));
+                    Profile profile = Profile.fromUuid(player.getUuid());
                     profile.setDiscordId(argString);
                     player.sendMessage("[debug] discordid set -> " + argString);
                     break;

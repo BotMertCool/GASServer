@@ -1,4 +1,4 @@
-package com.goodasssub.gasevents.commands;
+package com.goodasssub.gasevents.commands.staff;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

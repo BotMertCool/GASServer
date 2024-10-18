@@ -1,4 +1,4 @@
-package com.goodasssub.gasevents.commands;
+package com.goodasssub.gasevents.commands.profile;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
@@ -36,7 +36,7 @@ public class NicknameCommand extends Command {
                 return;
             }
 
-            Profile profile = Profile.getOrCreateProfileByUUID(String.valueOf(player.getUuid()));
+            Profile profile = Profile.fromUuid(player.getUuid());
 
             String[] nicknameStringArray = context.get(nickname);
             String nicknameString = String.join(" ", nicknameStringArray);

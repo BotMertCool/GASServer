@@ -1,9 +1,8 @@
-package com.goodasssub.gasevents.commands;
+package com.goodasssub.gasevents.commands.profile;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
-import com.goodasssub.gasevents.profile.Rank;
-import com.goodasssub.gasevents.util.PlayerUtil;
+import com.goodasssub.gasevents.rank.Rank;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
@@ -48,7 +47,7 @@ public class PlayersCommand extends Command {
 
             List<Component> playerNames = players.stream()
                 .sorted(Comparator.comparingInt((Player player) ->
-                    Profile.getOrCreateProfileByUUID(player.getUuid().toString()).getRank().getWeight()).reversed()
+                    Profile.fromUuid(player.getUuid()).getRank().getWeight()).reversed()
                 )
                 .map(player -> {
                     Component playerName = player.getName();

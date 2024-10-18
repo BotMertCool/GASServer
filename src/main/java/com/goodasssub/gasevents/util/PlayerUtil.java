@@ -12,7 +12,7 @@ public class PlayerUtil {
         List<Player> onlineStaff = new ArrayList<>();
 
         for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            Profile profile = Profile.getOrCreateProfileByUUID(String.valueOf(player.getUuid()));
+            Profile profile = Profile.fromUuid(player.getUuid());
 
             if (profile.getRank().isStaff())
                 onlineStaff.add(player);

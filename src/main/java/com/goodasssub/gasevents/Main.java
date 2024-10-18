@@ -2,11 +2,16 @@ package com.goodasssub.gasevents;
 
 import com.goodasssub.gasevents.anticheat.AntiCheat;
 import com.goodasssub.gasevents.commands.*;
+import com.goodasssub.gasevents.commands.profile.NicknameCommand;
+import com.goodasssub.gasevents.commands.profile.PlayersCommand;
+import com.goodasssub.gasevents.commands.profile.SyncCommand;
+import com.goodasssub.gasevents.commands.staff.TeleportCommand;
+import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
 import com.goodasssub.gasevents.config.Config;
 import com.goodasssub.gasevents.config.ConfigManager;
-import com.goodasssub.gasevents.database.MongoDB;
+import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
-import com.goodasssub.gasevents.handlers.PlayerHandler;
+import com.goodasssub.gasevents.profile.ProfileHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -46,7 +51,8 @@ public class Main {
 
     @Getter private final Config config;
     @Getter private final Logger logger;
-    @Getter private final MongoDB mongoDB;
+    @Getter private final MongoHandler mongoHandler;
+    @Getter private final ProfileHandler profileHandler;
     @Getter private final DiscordBot discordBot;
     @Getter private final InstanceContainer instanceContainer;
     @Getter private final MiniMessage miniMessage;
@@ -75,7 +81,6 @@ public class Main {
         commandManager.register(new GamemodeCommand());
         commandManager.register(new PlayersCommand());
         commandManager.register(new SyncCommand());
-        commandManager.register(new ShoutCommand());
         commandManager.register(new NicknameCommand());
         commandManager.register(new TeleportCommand());
 
@@ -121,7 +126,7 @@ public class Main {
         eventHandler.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
         eventHandler.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
 
-        PlayerHandler.init();
+        this.profileHandler = new ProfileHandler(this);
         AntiCheat.init();
 
         if (config.getMojangAuth()) {
@@ -131,7 +136,7 @@ public class Main {
             logger.info("Mojang auth disabled.");
         }
 
-        mongoDB = new MongoDB(config.getMongoUri(), config.getMongoDatabase());
+        mongoHandler = new MongoHandler(config.getMongoUri(), config.getMongoDatabase());
         discordBot = new DiscordBot(config.getDiscordToken());
         discordBot.startBot();
 

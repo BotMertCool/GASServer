@@ -1,7 +1,6 @@
-package com.goodasssub.gasevents.handlers;
+package com.goodasssub.gasevents.profile;
 
 import com.goodasssub.gasevents.Main;
-import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.TPSUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

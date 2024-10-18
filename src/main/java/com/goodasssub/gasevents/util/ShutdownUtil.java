@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class ShutdownUtil {
     public static void stopServer() {
         Main.getInstance().getDiscordBot().stopBot();
-        Main.getInstance().getMongoDB().close();
+        Main.getInstance().getMongoHandler().close();
 
         for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers())
             player.kick(Component.text("Server is shutting down", NamedTextColor.RED));

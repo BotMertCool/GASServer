@@ -1,6 +1,7 @@
-package com.goodasssub.gasevents.commands;
+package com.goodasssub.gasevents.commands.profile;
 
 import com.goodasssub.gasevents.Main;
+import com.goodasssub.gasevents.discordbot.DiscordBot;
 import com.goodasssub.gasevents.profile.Profile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +25,7 @@ public class SyncCommand extends Command {
                 return;
             }
 
-            Profile profile = Profile.getOrCreateProfileByUUID(player.getUuid().toString());
+            Profile profile = Profile.fromUuid(player.getUuid());
 
             if (profile == null) {
                 Main.getInstance().getLogger().error("Error profile null: {}", player.getUsername());
@@ -37,7 +38,7 @@ public class SyncCommand extends Command {
                 return;
             }
 
-            final String syncChannelName = "#sync";
+            final String syncChannelName = DiscordBot.syncChannelName;
 
             sender.sendMessage(Component.text("Enter the code ", NamedTextColor.GREEN)
                 .append(Component.text(profile.getSyncCode(), NamedTextColor.WHITE))

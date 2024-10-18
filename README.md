@@ -5,3 +5,6 @@
 ./gradlew shadowJar
 ```
 File compiles to: ./build/libs/
+
+# possibilities
+* Modularize -> Common, Core, Events
