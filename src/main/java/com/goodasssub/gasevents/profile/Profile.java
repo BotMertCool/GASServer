@@ -68,18 +68,11 @@ public class Profile {
         this.discordId = document.getString("discordId");
         this.syncCode = document.getString("syncCode");
 
-        //Rank newRank = Rank.getRankByName(document.getString("rank"));
-//
-        //if (newRank != null) {
-        //    this.rank = newRank;
-        //}
-
         var mongo = Main.getInstance().getMongoHandler();
-
         try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(this.getUuid())) {
             cursor.forEachRemaining(punishmentDocument -> {
-                Punishment punishment = new Punishment();
-                //punishment.load(punishmentDocument);
+                UUID uuid = UUID.fromString(punishmentDocument.getString("uuid"));
+                Punishment punishment = new Punishment(uuid);
 
                 this.punishments.add(punishment);
             });
