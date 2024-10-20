@@ -55,6 +55,7 @@ public class Main {
     @Getter private final MongoHandler mongoHandler;
     @Getter private final ProfileHandler profileHandler;
     @Getter private final DiscordBot discordBot;
+    @Getter private final AntiCheat antiCheat;
     @Getter private final InstanceContainer instanceContainer;
     @Getter private final MiniMessage miniMessage;
 
@@ -110,7 +111,6 @@ public class Main {
         MinecraftServer.getBenchmarkManager().enable(Duration.of(5, TimeUnit.SECOND));
         MinecraftServer.setCompressionThreshold(0);
 
-
         var eventHandler = MinecraftServer.getGlobalEventHandler();
 
         eventHandler.addListener(ServerListPingEvent.class, event -> {
@@ -132,10 +132,10 @@ public class Main {
         eventHandler.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
 
         this.profileHandler = new ProfileHandler(this);
-        AntiCheat.init();
+        antiCheat = new AntiCheat();
 
         if (config.getMojangAuth()) {
-            MojangAuth.init();
+            //MojangAuth.init();
             logger.info("Mojang auth initialized.");
         } else {
             logger.info("Mojang auth disabled.");

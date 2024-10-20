@@ -45,7 +45,7 @@ public class DiscordBot {
                 Message message = event.getMessage();
 
                 if (!message.getChannelId().equals(Snowflake.of(syncChannelId))) return;
-                if (message.getContent().length() != 6) return;
+                if (message.getContent().length() != 5) return;
                 if (message.getAuthor().isEmpty()) return;
 
                 User author = message.getAuthor().get();

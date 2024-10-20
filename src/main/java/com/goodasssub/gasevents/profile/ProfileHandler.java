@@ -2,9 +2,11 @@ package com.goodasssub.gasevents.profile;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.commands.profile.NicknameCommand;
+import com.goodasssub.gasevents.config.Config;
 import com.goodasssub.gasevents.items.VisibilityItem;
 import com.goodasssub.gasevents.entities.NametagEntity;
 import com.goodasssub.gasevents.rank.Rank;
+import com.goodasssub.gasevents.util.SyncUtil;
 import discord4j.core.object.entity.Member;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -33,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 public class ProfileHandler {
     private Component tabHeader;
     private Component tabFooter;
-    private Main instance;
+    private final Main instance;
 
     public ProfileHandler(Main instance) {
         this.instance = instance;
@@ -54,10 +56,8 @@ public class ProfileHandler {
             if (players.isEmpty())
                 return;
 
-            Map<UUID, Profile> profiles = Profile.getCache();
-
-            profiles.entrySet().removeIf(entry -> entry.getValue().getPlayer() == null);
-
+            Main.getInstance().getAntiCheat().sendFlaggedAlerts();
+            Profile.getCache().entrySet().removeIf(entry -> entry.getValue().getPlayer() == null);
             Audiences.players().sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
 
             sidebar.update(players.size());
@@ -79,43 +79,24 @@ public class ProfileHandler {
             //TODO: move to prevention.
             event.setCancelled(true);
         });
-        eventNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
-            Player player = event.getPlayer();
-            Profile profile = Profile.fromUuid(player.getUuid());
-
-            if (profile.getIpAddress() == null) {
-                Main.getInstance().getLogger().info(player.getPlayerConnection().getRemoteAddress().toString());
-                Main.getInstance().getLogger().info(player.getPlayerConnection().getIdentifier());
-                //profile.setIpAddress(player.getPlayerConnection().getRemoteAddress());
-            }
-
-            String profileName = profile.getName();
-            if (profileName == null || !profileName.equals(player.getUsername())) {
-                profile.setName(player.getUsername());
-                profile.save();
-            }
-
-            if (profile.getDiscordId() != null) {
-                profile.checkAndUpdateRank();
-            }
-            //player.sendMessage((System.currentTimeMillis() - spawnStartTime) + "ms");
-
-            // TODO: use permissions
-            if (profile.getRank().equals(Rank.OWNER)) {
-                player.setPermissionLevel(4);
-            }
-            //event.getPlayer().getPlayerConnection();
-        });
 
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
             event.setSpawningInstance(spawnInstance);
 
-            player.setRespawnPoint(new Pos(434.5, 4.5, 1036.5, -90, -.5f));
+            Config config = Main.getInstance().getConfig();
+
+            Pos pos = new Pos(
+                config.getSpawnX(),
+                config.getSpawnY(),
+                config.getSpawnZ()
+            );
+
+            player.setRespawnPoint(pos);
         });
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
-            
+
             VisibilityItem.playerVisibilityMap.forEach((uuid, bool) -> {
                 Player viewer = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
                 if (viewer != null) {
@@ -136,21 +117,46 @@ public class ProfileHandler {
                 <gray>%s</gray>""".formatted(bar, bar);
 
             player.sendMessage(instance.getMiniMessage().deserialize(joinMessage));
-            CompletableFuture.runAsync(() -> {
-                Profile profile = Profile.fromUuid(player.getUuid());
 
-                if (profile.getDiscordId() == null) {
-                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
-                        "You can do this with the /sync command.", NamedTextColor.RED));
-                    return;
-                }
+            Profile profile = Profile.fromUuid(player.getUuid());
 
-                Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
-                    .append(Component.text(player.getUsername()));
+            boolean save = false;
 
-                player.setDisplayName(playerName);
-                new NametagEntity(player);
-            });
+            if (profile.getIpAddress() == null) {
+                InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
+                profile.setIpAddress(address.getHostName());
+                save = true;
+            }
+
+            String profileName = profile.getName();
+            if (profileName == null || !profileName.equals(player.getUsername())) {
+                profile.setName(player.getUsername());
+                save = true;
+            }
+
+            if (profile.getDiscordId() != null) {
+                profile.checkAndUpdateRank();
+                save = true;
+            } else {
+                player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
+                    "You can do this with the /sync command.", NamedTextColor.RED));
+            }
+
+            // TODO: use permissions
+            if (profile.getRank().equals(Rank.OWNER)) {
+                player.setPermissionLevel(4);
+            }
+
+            if (save) profile.save();
+
+            Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
+                .append(Component.text(player.getUsername()));
+
+            player.setDisplayName(playerName);
+
+            new NametagEntity(player);
+
+
         });
         eventNode.addListener(PlayerDisconnectEvent.class, event -> {
             Player player = event.getPlayer();
@@ -169,25 +175,9 @@ public class ProfileHandler {
             Profile profile = Profile.fromUuid(player.getUuid());
             Component formattedName = profile.getFormattedName();
 
-            event.setChatFormat(chatEvent -> {
-                Component discordName = Component.empty();
-                if (profile.getDiscordId() != null) {
-                    Member member = instance.getDiscordBot().getMemberById(profile.getDiscordId());
-                    String discordUsername = member.getUsername();
-
-                    if (!discordUsername.equals(player.getUsername()) &&
-                        !NicknameCommand.nickedPlayer.contains(player.getUuid())) {
-                        discordName = Component.space().append(instance.getMiniMessage().deserialize(
-                            String.format("<gray>(<#3E7CF7>%s<gray>)", discordUsername)
-                        ));
-                    }
-                }
-
-                return formattedName
-                    .append(discordName)
-                    .append(Component.text(": ", NamedTextColor.GRAY))
-                    .append(Component.text(event.getMessage(), NamedTextColor.WHITE));
-            });
+            event.setChatFormat(chatEvent -> formattedName
+                .append(Component.text(": ", NamedTextColor.GRAY))
+                .append(Component.text(event.getMessage(), NamedTextColor.WHITE)));
         });
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             Player player = event.getPlayer();

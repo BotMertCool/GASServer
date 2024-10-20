@@ -57,13 +57,14 @@ public class Profile {
 
         this.ipAddress = document.getString("ipAddress");
 
-        this.rank = Rank.DEFAULT;
         this.discordId = document.getString("discordId");
         this.syncCode = document.getString("syncCode");
 
-        if (this.getRank() == null) {
-            this.name = document.getString("name");
-        }
+        //Rank newRank = Rank.getRankByName(document.getString("rank"));
+//
+        //if (newRank != null) {
+        //    this.rank = newRank;
+        //}
 
         var mongo = Main.getInstance().getMongoHandler();
 

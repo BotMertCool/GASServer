@@ -19,7 +19,7 @@ public class TeleportCommand extends Command {
         setCondition(Conditions::playerOnly);
 //        setCondition((sender, ignored) -> sender.hasPermission("minestom.teleport"));
 
-        setDefaultExecutor((source, context) -> source.sendMessage(Component.text("Usage: /tp x y z")));
+        setDefaultExecutor((source, context) -> source.sendMessage(Component.text("Usage: /tp <player> | <x> <y> <z>", NamedTextColor.RED)));
 
         var posArg = ArgumentType.RelativeVec3("pos");
         var playerArg = ArgumentType.Word("player");
