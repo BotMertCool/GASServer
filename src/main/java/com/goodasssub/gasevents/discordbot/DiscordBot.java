@@ -52,9 +52,10 @@ public class DiscordBot {
                 if (author.isBot()) return;
 
                 String syncCode = message.getContent();
-                Profile profile = Profile.fromSyncCode(syncCode);
+                Profile syncProfile = Profile.fromSyncCode(syncCode);
+                Profile discordProfile = Profile.fromDiscordId(author.getId().asString());
 
-                if (profile == null) {
+                if (syncProfile == null) {
                     message.getChannel()
                         .flatMap(channel -> channel.createMessage("<@%s> This sync code is invalid."
                             .formatted(author.getId().asString())))
@@ -62,7 +63,7 @@ public class DiscordBot {
                     return;
                 }
 
-                if (profile.getDiscordId() != null) {
+                if (syncProfile.getDiscordId() != null) {
                     message.getChannel()
                         .flatMap(channel -> channel.createMessage("<@%s> Your account is already synced."
                             .formatted(author.getId().asString())))
@@ -70,7 +71,14 @@ public class DiscordBot {
                     return;
                 }
 
-                profile.setDiscordId(author.getId().asString());
+                if (discordProfile != null) {
+                    message.getChannel()
+                        .flatMap(channel -> channel.createMessage("<@%s> Your account is already synced."
+                            .formatted(author.getId().asString())))
+                        .subscribe();
+                    return;
+                }
+                syncProfile.setDiscordId(author.getId().asString());
                 //profile.checkAndUpdateRank();
 
                 message.getChannel()
@@ -78,7 +86,7 @@ public class DiscordBot {
                         .formatted(author.getId().asString())))
                     .subscribe();
 
-                Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(profile.getUuid());
+                Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(syncProfile.getUuid());
 
                 if (player == null) return;
 

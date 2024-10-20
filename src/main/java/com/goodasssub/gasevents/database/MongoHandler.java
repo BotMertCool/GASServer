@@ -36,6 +36,10 @@ public class MongoHandler implements Closeable {
         return this.profiles.find(Filters.eq("syncCode", syncCode)).first();
     }
 
+    public Document getProfileByDiscordId(String discordId) {
+        return this.profiles.find(Filters.eq("discordId", discordId)).first();
+    }
+
     public void upsertProfile(UUID uuid, Document document) {
         this.profiles.replaceOne(Filters.eq("uuid", String.valueOf(uuid)), document,
             new ReplaceOptions().upsert(true)

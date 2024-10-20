@@ -7,12 +7,7 @@ import com.goodasssub.gasevents.items.VisibilityItem;
 import com.goodasssub.gasevents.entities.NametagEntity;
 import com.goodasssub.gasevents.profile.whitelist.WhitelistHandler;
 import com.goodasssub.gasevents.rank.Rank;
-import com.goodasssub.gasevents.util.SyncUtil;
-import com.goodasssub.gasevents.util.UUIDUtil;
 import com.google.gson.JsonSyntaxException;
-import discord4j.core.object.entity.Member;
-import io.netty.util.concurrent.CompleteFuture;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,16 +22,12 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
-import net.minestom.server.listener.preplay.LoginListener;
-import net.minestom.server.network.player.PlayerConnection;
-import net.minestom.server.network.player.PlayerSocketConnection;
 import net.minestom.server.utils.time.TimeUnit;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-@Getter
 public class ProfileHandler {
 
     private final WhitelistHandler whitelistHandler;
@@ -102,9 +93,12 @@ public class ProfileHandler {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
-            if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
-                player.kick(Component.text("You are not whitelisted."));
-                return;
+            if (this.whitelistEnabled()) {
+                CompletableFuture.runAsync(() -> {
+                    if (!isPlayerWhitelisted(player.getUuid())) {
+                        player.kick(Component.text("You are not whitelisted."));
+                    }
+                });
             }
 
             event.setClearChat(true);
@@ -244,17 +238,35 @@ public class ProfileHandler {
 
     public boolean isPlayerWhitelisted(UUID uuid) {
         String uuidString = String.valueOf(uuid);
-        List<String> players = this.getWhitelistHandler().getWhitelist().getPlayers();
+        var players = this.whitelistHandler.getWhitelist().getPlayers();
 
-        return players.stream().anyMatch((playerUUID) -> playerUUID.equals(uuidString));
+        return players.entrySet().stream().anyMatch((playerUUID) -> playerUUID.getKey().equals(uuidString));
     }
 
+    public void addPlayerWhitelist(UUID uuid, String playerName) {
+        Map<String, String> players = this.whitelistHandler.getWhitelist().getPlayers();
+        players.put(String.valueOf(uuid), playerName);
+        this.whitelistHandler.getWhitelist().setPlayers(players);
+        this.whitelistHandler.saveJson();
+    }
+
+    public void removePlayerWhitelist(UUID uuid) {
+        Map<String, String> players = this.whitelistHandler.getWhitelist().getPlayers();
+        players.remove(String.valueOf(uuid));
+        this.whitelistHandler.getWhitelist().setPlayers(players);
+        this.whitelistHandler.saveJson();
+    }
+
+    public Map<String, String> getWhitelistList() {
+        return this.whitelistHandler.getWhitelist().getPlayers();
+    }
+    
     public void setWhitelistMode(boolean mode) {
-        this.getWhitelistHandler().getWhitelist().setEnabled(mode);
-        this.getWhitelistHandler().saveJson();
+        this.whitelistHandler.getWhitelist().setEnabled(mode);
+        this.whitelistHandler.saveJson();
     }
 
     public boolean whitelistEnabled() {
-        return this.getWhitelistHandler().getWhitelist().isEnabled();
+        return this.whitelistHandler.getWhitelist().isEnabled();
     }
 }

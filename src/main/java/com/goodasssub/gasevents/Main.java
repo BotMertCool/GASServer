@@ -2,12 +2,10 @@ package com.goodasssub.gasevents;
 
 import com.goodasssub.gasevents.anticheat.AntiCheat;
 import com.goodasssub.gasevents.commands.*;
-import com.goodasssub.gasevents.commands.profile.NicknameCommand;
-import com.goodasssub.gasevents.commands.profile.PlayersCommand;
-import com.goodasssub.gasevents.commands.profile.SyncCommand;
+import com.goodasssub.gasevents.commands.profile.*;
+import com.goodasssub.gasevents.commands.profile.whitelist.*;
 import com.goodasssub.gasevents.commands.staff.TeleportCommand;
 import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
-import com.goodasssub.gasevents.config.Config;
 import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
@@ -20,6 +18,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
@@ -88,6 +87,7 @@ public class Main {
         commandManager.register(new SyncCommand());
         commandManager.register(new NicknameCommand());
         commandManager.register(new TeleportCommand());
+        commandManager.register(new WhitelistCommand());
 
         SimpleCommands.register(commandManager);
 
@@ -141,7 +141,7 @@ public class Main {
             logger.info("Mojang auth initialized.");
         } else {
 
-            connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUUID(username));
+            connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUuid(username));
 
             logger.info("Mojang auth disabled.");
         }

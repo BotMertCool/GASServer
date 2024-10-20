@@ -126,6 +126,21 @@ public class Profile {
         return new Profile(uuid);
     }
 
+    public static Profile fromDiscordId(String discordId) {
+        Document document = Main.getInstance().getMongoHandler().getProfileBySyncCode(discordId);
+
+        if (document == null) return null;
+
+        UUID uuid = UUID.fromString(document.getString("uuid"));
+
+        if (Profile.getCache().containsKey(uuid)) {
+            return Profile.getCache().get(uuid);
+        }
+
+        return new Profile(uuid);
+    }
+
+
     public void setDiscordId(String discordId) {
         this.discordId = discordId;
         this.syncCode = null;

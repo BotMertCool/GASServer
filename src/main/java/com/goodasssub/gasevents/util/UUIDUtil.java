@@ -1,13 +1,60 @@
 package com.goodasssub.gasevents.util;
 
+import com.goodasssub.gasevents.Main;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
+
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class UUIDUtil {
+    private static final String MOJANG_API_URL = "https://api.mojang.com/users/profiles/minecraft/";
+    private static final Pattern UUID_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
+    private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
-    public static UUID getOfflineUUID(String playerName) {
+    public static UUID uuidFromName(String playerName) {
+        if (Main.getInstance().getConfigManager().getConfig().getMojangAuth())
+            return getOfflineUuid(playerName);
+
+        return getOnlineUuid(playerName);
+    }
+
+    public static UUID getOnlineUuid(String playerName) {
+        Player onlinePlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(playerName);
+        if (onlinePlayer != null) return onlinePlayer.getUuid();
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(MOJANG_API_URL + playerName))
+                .GET()
+                .build();
+
+            HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                String jsonResponse = response.body();
+                String id = jsonResponse.split("\"id\":\"")[1].split("\"")[0];
+
+                String formattedUUID = UUID_PATTERN.matcher(id).replaceFirst("$1-$2-$3-$4-$5");
+                return UUID.fromString(formattedUUID);
+            }
+        } catch (Exception e) {
+            Main.getInstance().getLogger().error("Error: {}", e.getMessage());
+        }
+
+        return null;
+    }
+
+    public static UUID getOfflineUuid(String playerName) {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
 
