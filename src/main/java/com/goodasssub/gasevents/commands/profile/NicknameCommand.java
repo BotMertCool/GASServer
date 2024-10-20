@@ -22,10 +22,16 @@ public class NicknameCommand extends Command {
         ArgumentStringArray nickname = ArgumentType.StringArray("nickname");
 
         setDefaultExecutor((sender, context) -> {
-            Player player = (Player) sender;
+            if (!(sender instanceof Player player)) return;
+
             String commandName = context.getCommandName();
 
-            player.sendMessage(Component.text("Usage: /" + commandName + " <nickname>", NamedTextColor.RED));
+            if (player.getPermissionLevel() < 2) {
+                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
+
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <nickname>", NamedTextColor.RED));
         });
 
         addSyntax((sender, context) -> {

@@ -17,11 +17,18 @@ public class TeleportCommand extends Command {
         super("teleport", "tp");
 
         setCondition(Conditions::playerOnly);
-//        setCondition((sender, ignored) -> sender.hasPermission("minestom.teleport"));
+        setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
 
-        setDefaultExecutor((source, context) -> source.sendMessage(
-            Component.text("Usage: /" + context.getCommandName() + " <player> | <x> <y> <z>", NamedTextColor.RED)
-        ));
+            String commandName = context.getCommandName();
+            
+            if (player.getPermissionLevel() < 2) {
+                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
+
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <player> | <x> <y> <z>", NamedTextColor.RED));
+        });
 
         var posArg = ArgumentType.RelativeVec3("pos");
         var playerArg = ArgumentType.Word("player");

@@ -10,13 +10,8 @@ public class WhitelistOffCommand extends Command {
     public WhitelistOffCommand() {
         super("off");
 
-//        setCondition((sender, ignored) -> sender.hasPermission("minestom.teleport"));
-
-        setDefaultExecutor((source, context) -> {
-            if (!(source instanceof Player player)) {
-                // asdsfgg dsa fdsaf sda f
-                return;
-            }
+        setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
 
             if (player.getPermissionLevel() < 2) {
                 player.sendMessage(Component.text("No permission.", NamedTextColor.RED));

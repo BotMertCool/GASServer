@@ -29,7 +29,14 @@ public class GamemodeCommand extends Command {
         ArgumentEntity target = ArgumentType.Entity("targets").onlyPlayers(true);
 
         setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
+
             String commandName = context.getCommandName();
+
+            if (player.getPermissionLevel() < 2) {
+                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
 
             sender.sendMessage(Component.text("Usage: /" + commandName + " <gamemode> [targets]", NamedTextColor.RED));
         });

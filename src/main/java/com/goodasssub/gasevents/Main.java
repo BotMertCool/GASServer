@@ -6,6 +6,7 @@ import com.goodasssub.gasevents.commands.profile.*;
 import com.goodasssub.gasevents.commands.profile.whitelist.*;
 import com.goodasssub.gasevents.commands.staff.TeleportCommand;
 import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
+import com.goodasssub.gasevents.commands.staff.ThruCommand;
 import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
@@ -88,6 +89,7 @@ public class Main {
         commandManager.register(new NicknameCommand());
         commandManager.register(new TeleportCommand());
         commandManager.register(new WhitelistCommand());
+        commandManager.register(new ThruCommand());
 
         SimpleCommands.register(commandManager);
 

@@ -16,11 +16,18 @@ public class WhitelistAddCommand extends Command {
     public WhitelistAddCommand() {
         super("add");
 
-//        setCondition((sender, ignored) -> sender.hasPermission("minestom.teleport"));
+        setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
 
-        setDefaultExecutor((source, context) -> source.sendMessage(
-            Component.text("Usage: /" + context.getCommandName() + " <player>", NamedTextColor.RED)
-        ));
+            String commandName = context.getCommandName();
+
+            if (player.getPermissionLevel() < 2) {
+                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
+
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
+        });
 
         var playerArg = ArgumentType.Word("player");
 
