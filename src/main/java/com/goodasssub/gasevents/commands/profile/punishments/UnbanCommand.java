@@ -13,11 +13,12 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
-public class BanCommand extends Command {
-    public BanCommand() {
-        super("ban");
+public class UnbanCommand extends Command {
+    public UnbanCommand() {
+        super("unban");
 
         setDefaultExecutor((sender, context) -> {
             if (!(sender instanceof Player player)) return;
@@ -29,18 +30,16 @@ public class BanCommand extends Command {
                 return;
             }
 
-            sender.sendMessage(Component.text("Usage: /" + commandName + " <player> [reason]", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
 
         var playerArg = ArgumentType.Word("player");
-        var reasonArg = ArgumentType.Word("reason");
 
-        addSyntax((sender, context) -> execute(sender, context, "None"), playerArg);
-        addSyntax((sender, context) -> execute(sender, context, context.get("reason")), playerArg, reasonArg);
+        addSyntax(this::execute, playerArg);
     }
 
-    private void execute(CommandSender sender, CommandContext context, String reason) {
-        final Player player = (Player) sender;
+    private void execute(CommandSender sender, CommandContext context) {
+        if (!(sender instanceof Player player)) return;
 
         if (player.getPermissionLevel() < 2) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
@@ -60,19 +59,21 @@ public class BanCommand extends Command {
             return;
         }
 
-        if (Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
-            sender.sendMessage(Component.text(playerName + " is already banned.", NamedTextColor.RED));
+        if (!Profile.profileExists(uuid) ||
+            !Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
+            sender.sendMessage(Component.text(playerName + " is not banned.", NamedTextColor.RED));
             return;
         }
 
-        Punishment punishment = new Punishment(
-            PunishmentType.BAN,
-            player.getUuid(),
-            uuid,
-            reason,
-            Punishment.PERMANENT
-        );
+        //Profile profile = Profile.fromUuid(uuid);
 
-        punishment.execute(false, playerName);
+        List<Punishment> punishments = Main.getInstance().getProfileHandler().getActivePlayerPunishments(uuid);
+
+        for (Punishment punishment : punishments) {
+            if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
+
+            punishment.removePunishment(false, playerName, player.getUuid());
+        }
+
     }
 }

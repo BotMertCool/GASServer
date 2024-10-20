@@ -1,9 +1,9 @@
 package com.goodasssub.gasevents.profile.punishments;
 
 import com.goodasssub.gasevents.Main;
+import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.TimeUtil;
-import com.mongodb.client.MongoCursor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -13,11 +13,15 @@ import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import org.bson.Document;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class Punishment {
+    // TODO: ADD? : @Getter private final static Map<UUID, Profile> cache = new ConcurrentHashMap<>();
+
     public static final long PERMANENT = 0L;
     public static final UUID SYSTEM_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     public static final UUID ANTICHEAT_UUID = UUID.fromString("10000000-0000-0000-0000-000000000000");
@@ -64,12 +68,15 @@ public class Punishment {
         }
 
         this.punishmentType = PunishmentType.valueOf(document.getString("type"));
-        this.executor = UUID.fromString(document.getString("executor_uuid"));
-        this.target = UUID.fromString(document.getString("target_uuid"));
+        this.executor = UUID.fromString(document.getString("uuid_executor"));
+        this.target = UUID.fromString(document.getString("uuid_target"));
         this.reason = document.getString("reason");
         this.expireTime = document.getLong("expire_time");
         this.removed = document.getBoolean("removed");
-        this.removedBy = UUID.fromString(document.getString("removed_uuid"));
+
+        if (document.getString("uuid_remover") != null) {
+            this.removedBy = UUID.fromString(document.getString("uuid_remover"));
+        }
     }
 
     public void save() {
@@ -80,26 +87,29 @@ public class Punishment {
         document.put("uuid", String.valueOf(this.uuid));
         document.put("type", String.valueOf(this.punishmentType));
         document.put("reason", Objects.requireNonNullElse(this.reason, "None"));
-        document.put("executor_uuid", String.valueOf(this.executor));
-        document.put("target_uuid", String.valueOf(this.target));
+        document.put("uuid_executor", String.valueOf(this.executor));
+        document.put("uuid_target", String.valueOf(this.target));
         document.put("expire_time", this.expireTime);
         document.put("removed", this.removed);
-        document.put("removed_uuid", String.valueOf(this.removedBy));
+        document.put("uuid_remover", this.removedBy.toString());
 
-        Main.getInstance().getMongoHandler().upsertProfile(this.uuid, document);
+        Main.getInstance().getMongoHandler().upsertPunishment(this.uuid, document);
     }
 
     public boolean isPermanent() {
         return expireTime == 0;
     }
 
-    public boolean isBanned() {
+    public boolean isActive() {
         return !removed && (isPermanent() || System.currentTimeMillis() < expireTime);
     }
 
-    public void removePunishment(UUID removedBy) {
+    public void removePunishment(boolean silent, String playerName, UUID removedBy) {
         this.removed = true;
         this.removedBy = removedBy;
+        this.broadcast(silent, playerName, true);
+
+        this.save();
     }
 
     public String getTimeLeft() {
@@ -115,13 +125,13 @@ public class Punishment {
 
     public void execute(boolean silent, String playerName) {
         Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.target);
-        this.broadcast(silent, playerName);
+        this.broadcast(silent, playerName, false);
         if (target != null) target.kick("test");
 
         this.save();
     }
 
-    private void broadcast(boolean silent, String playerName) {
+    private void broadcast(boolean silent, String playerName, boolean removal) {
         var connectionManager = MinecraftServer.getConnectionManager();
 
         Component executorDisplayName = Component.text("Error", NamedTextColor.RED);
@@ -157,6 +167,10 @@ public class Punishment {
             punishmentTypeString = "muted";
         }
 
+        if (removal) {
+            punishmentTypeString = "un" + punishmentTypeString;
+        }
+
         if (silent) {
             broadcastMsg.append(Component.text("[Silent] ", NamedTextColor.GRAY));
         }
@@ -165,14 +179,16 @@ public class Punishment {
             .append(Component.text(" was %s by ".formatted(punishmentTypeString), NamedTextColor.WHITE))
             .append(executorDisplayName);
 
-        if (expireTime != PERMANENT) {
-            broadcastMsg.append(Component.text(" for ", NamedTextColor.WHITE));
-            broadcastMsg.append(Component.text(this.getTimeLeft(), NamedTextColor.GREEN));
-        }
+        if (!removal) {
+            if (expireTime != PERMANENT) {
+                broadcastMsg.append(Component.text(" for ", NamedTextColor.WHITE));
+                broadcastMsg.append(Component.text(this.getTimeLeft(), NamedTextColor.GREEN));
+            }
 
-        if (!reason.equals("None")) {
-            broadcastMsg.append(Component.text(" for ", NamedTextColor.WHITE));
-            broadcastMsg.append(Component.text(this.reason, NamedTextColor.GREEN));
+            if (!reason.equals("None")) {
+                broadcastMsg.append(Component.text(" for ", NamedTextColor.WHITE));
+                broadcastMsg.append(Component.text(this.reason, NamedTextColor.GREEN));
+            }
         }
 
         if (!silent) {

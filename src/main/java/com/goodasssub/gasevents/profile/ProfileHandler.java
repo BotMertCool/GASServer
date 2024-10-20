@@ -5,9 +5,12 @@ import com.goodasssub.gasevents.commands.profile.NicknameCommand;
 import com.goodasssub.gasevents.config.Config;
 import com.goodasssub.gasevents.items.VisibilityItem;
 import com.goodasssub.gasevents.entities.NametagEntity;
+import com.goodasssub.gasevents.profile.punishments.Punishment;
+import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.profile.whitelist.WhitelistHandler;
 import com.goodasssub.gasevents.rank.Rank;
 import com.google.gson.JsonSyntaxException;
+import com.mongodb.client.MongoCursor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,10 +26,12 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.time.TimeUnit;
+import org.bson.Document;
 
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProfileHandler {
 
@@ -90,13 +95,28 @@ public class ProfileHandler {
             } catch (JsonSyntaxException ignored) {}
         });
 
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+        eventNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
             final Player player = event.getPlayer();
 
             if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
                 player.kick(Component.text("You are not whitelisted."));
                 return;
             }
+
+            List<Punishment> punishments = getActivePlayerPunishments(player.getUuid());
+
+            for (Punishment punishment : punishments) {
+                if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
+
+                // TODO: show time left on ban / reason of ban
+
+                player.kick("You are banned.");
+                return;
+            }
+        });
+
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            final Player player = event.getPlayer();
 
             event.setClearChat(true);
             event.setSpawningInstance(spawnInstance);
@@ -121,7 +141,7 @@ public class ProfileHandler {
                 if (!bool) player.removeViewer(viewer);
             });
 
-            player.getInventory().setItemStack(0, VisibilityItem.getEnabledItem());
+            player.getInventory().setItemStack(4, VisibilityItem.getEnabledItem());
 
             String bar = "<strikethrough>" + " ".repeat(30) + "</strikethrough>";
 
@@ -169,7 +189,7 @@ public class ProfileHandler {
                 }
 
                 // TODO: use permissions
-                if (profile.getRank().equals(Rank.OWNER)) {
+                if (profile.getRank() == Rank.OWNER) {
                     player.setPermissionLevel(4);
                 }
 
@@ -191,6 +211,33 @@ public class ProfileHandler {
         });
         eventNode.addListener(PlayerChatEvent.class, event -> {
             Player player = event.getPlayer();
+
+            List<Punishment> punishments = getActivePlayerPunishments(player.getUuid());
+
+            for (Punishment punishment : punishments) {
+                if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
+
+                // TODO: show time left on ban / reason of ban
+
+                TextComponent.Builder builder = Component.text().color(NamedTextColor.RED);
+
+                builder.append(Component.text("You are banned!"));
+
+                if (!punishment.isPermanent()) {
+                    builder.appendNewline();
+                    builder.append(Component.text("Time left: " + punishment.getTimeLeft()));
+                }
+
+                builder.appendNewline();
+                builder.append(Component.text("Reason: " + punishment.getReason()));
+
+//                builder.appendNewline();
+//                builder.appendNewline();
+//                builder.append(Component.text("Appeal at: <whatewsrtaw ew fawesf a>"));
+
+                player.kick(builder.build());
+                break;
+            }
 
             Profile profile = Profile.fromUuid(player.getUuid());
             Component formattedName = profile.getFormattedName();
@@ -231,6 +278,63 @@ public class ProfileHandler {
         for (int i = 0; i < footerStrings.size(); i++)
             footerBuilder.append(instance.getMiniMessage().deserialize(footerStrings.get(i) + (i < footerStrings.size() - 1 ? "\n" : "")));
         tabFooter = footerBuilder.build();
+    }
+
+    public List<Punishment> getPlayerPunishments(UUID uuid) {
+        List<Punishment> punishments = new ArrayList<>();
+
+        var mongo = Main.getInstance().getMongoHandler();
+
+        try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(uuid)) {
+            cursor.forEachRemaining(punishmentDocument -> {
+                UUID punishmentUUID = UUID.fromString(punishmentDocument.getString("uuid"));
+                Punishment punishment = new Punishment(punishmentUUID);
+
+                punishments.add(punishment);
+            });
+        }
+
+        return punishments;
+    }
+
+    public List<Punishment> getActivePlayerPunishments(UUID uuid) {
+        List<Punishment> punishments = new ArrayList<>();
+
+        var mongo = Main.getInstance().getMongoHandler();
+
+        try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(uuid)) {
+            cursor.forEachRemaining(punishmentDocument -> {
+                UUID punishmentUUID = UUID.fromString(punishmentDocument.getString("uuid"));
+                Punishment punishment = new Punishment(punishmentUUID);
+
+                if (punishment.isActive()) {
+                    punishments.add(punishment);
+                }
+            });
+        }
+
+        return punishments;
+    }
+
+    public boolean isPlayerPunishmentType(UUID uuid, PunishmentType type) {
+        var mongo = Main.getInstance().getMongoHandler();
+
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(uuid)) {
+            cursor.forEachRemaining(punishmentDocument -> {
+                if (atomicBoolean.get()) return;
+
+                UUID punishmentUUID = UUID.fromString(punishmentDocument.getString("uuid"));
+                Punishment punishment = new Punishment(punishmentUUID);
+
+                if (punishment.isActive() && punishment.getPunishmentType() == type) {
+                    atomicBoolean.set(true);
+                }
+            });
+        }
+
+        return atomicBoolean.get();
     }
 
     public boolean isPlayerWhitelisted(UUID uuid) {

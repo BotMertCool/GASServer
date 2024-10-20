@@ -43,14 +43,6 @@ public class Profile {
         this.load();
     }
 
-    public void ban() {
-
-    }
-
-    public void mute() {
-
-    }
-
     public void load() {
         Document document = Main.getInstance().getMongoHandler().getProfile(this.uuid);
 
@@ -68,16 +60,6 @@ public class Profile {
         this.discordId = document.getString("discordId");
         this.syncCode = document.getString("syncCode");
 
-        var mongo = Main.getInstance().getMongoHandler();
-        try (MongoCursor<Document> cursor = mongo.getPunishmentsByTarget(this.getUuid())) {
-            cursor.forEachRemaining(punishmentDocument -> {
-                UUID uuid = UUID.fromString(punishmentDocument.getString("uuid"));
-                Punishment punishment = new Punishment(uuid);
-
-                this.punishments.add(punishment);
-            });
-        }
-        
         this.checkAndUpdateRank();
     }
 
@@ -95,6 +77,16 @@ public class Profile {
         document.put("syncCode", this.syncCode);
 
         Main.getInstance().getMongoHandler().upsertProfile(this.uuid, document);
+    }
+
+    public static boolean profileExists(UUID uuid) {
+        if (Profile.getCache().containsKey(uuid)) {
+            return true;
+        }
+
+        Document document = Main.getInstance().getMongoHandler().getProfile(uuid);
+
+        return document == null;
     }
 
     public static Profile fromUuid(UUID uuid) {

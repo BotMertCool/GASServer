@@ -4,6 +4,7 @@ import com.goodasssub.gasevents.anticheat.AntiCheat;
 import com.goodasssub.gasevents.commands.*;
 import com.goodasssub.gasevents.commands.profile.*;
 import com.goodasssub.gasevents.commands.profile.punishments.BanCommand;
+import com.goodasssub.gasevents.commands.profile.punishments.UnbanCommand;
 import com.goodasssub.gasevents.commands.profile.whitelist.*;
 import com.goodasssub.gasevents.commands.staff.FlyCommand;
 import com.goodasssub.gasevents.commands.staff.TeleportCommand;
@@ -94,6 +95,7 @@ public class Main {
         commandManager.register(new ThruCommand());
         commandManager.register(new FlyCommand());
         commandManager.register(new BanCommand());
+        commandManager.register(new UnbanCommand());
 
         SimpleCommands.register(commandManager);
 
