@@ -4,6 +4,7 @@ import com.goodasssub.gasevents.anticheat.AntiCheat;
 import com.goodasssub.gasevents.commands.*;
 import com.goodasssub.gasevents.commands.profile.*;
 import com.goodasssub.gasevents.commands.profile.whitelist.*;
+import com.goodasssub.gasevents.commands.staff.FlyCommand;
 import com.goodasssub.gasevents.commands.staff.TeleportCommand;
 import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
 import com.goodasssub.gasevents.commands.staff.ThruCommand;
@@ -90,6 +91,7 @@ public class Main {
         commandManager.register(new TeleportCommand());
         commandManager.register(new WhitelistCommand());
         commandManager.register(new ThruCommand());
+        commandManager.register(new FlyCommand());
 
         SimpleCommands.register(commandManager);
 
