@@ -13,15 +13,18 @@ import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
 import com.goodasssub.gasevents.profile.ProfileHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
+import com.goodasssub.gasevents.util.UUIDUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.event.player.PlayerSkinInitEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.extras.MojangAuth;
@@ -112,6 +115,7 @@ public class Main {
         MinecraftServer.setCompressionThreshold(0);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
+        var connectionManager = MinecraftServer.getConnectionManager();
 
         eventHandler.addListener(ServerListPingEvent.class, event -> {
             // TODO: add to config, desc, server name, etc
@@ -135,9 +139,18 @@ public class Main {
         antiCheat = new AntiCheat();
 
         if (config.getMojangAuth()) {
-            //MojangAuth.init();
+            MojangAuth.init();
             logger.info("Mojang auth initialized.");
         } else {
+
+            if (!Main.getInstance().getConfig().getMojangAuth()) {
+                connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUUID(username));
+
+                eventHandler.addListener(PlayerSkinInitEvent.class, event -> {
+                    event.setSkin(PlayerSkin.fromUsername(event.getPlayer().getUsername()));
+                });
+            }
+
             logger.info("Mojang auth disabled.");
         }
 

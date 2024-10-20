@@ -7,6 +7,7 @@ import com.goodasssub.gasevents.items.VisibilityItem;
 import com.goodasssub.gasevents.entities.NametagEntity;
 import com.goodasssub.gasevents.rank.Rank;
 import com.goodasssub.gasevents.util.SyncUtil;
+import com.goodasssub.gasevents.util.UUIDUtil;
 import discord4j.core.object.entity.Member;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -17,6 +18,7 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
@@ -41,6 +43,7 @@ public class ProfileHandler {
         this.instance = instance;
         
         var eventHandler = MinecraftServer.getGlobalEventHandler();
+
         eventHandler.addChild(getEventNode(instance.getInstanceContainer()));
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -80,8 +83,12 @@ public class ProfileHandler {
             event.setCancelled(true);
         });
 
+
+
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
+
+
             event.setSpawningInstance(spawnInstance);
 
             Config config = Main.getInstance().getConfig();

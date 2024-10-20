@@ -26,7 +26,7 @@ public class AntiCheat {
     // TODO: into mongo too?
 
     // K: Player UUID V: Alert Message
-    private final ConcurrentHashMap<UUID, Component> flaggedPlayers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Component, UUID> newFlaggedPlayers = new ConcurrentHashMap<>();
 
     public AntiCheat() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerFlagEvent.class, event -> {
@@ -36,17 +36,17 @@ public class AntiCheat {
                 .append(Component.text(event.checkName(), NamedTextColor.RED))
                 .append(Component.text(" [%sms]".formatted(event.player().getLatency()), NamedTextColor.GRAY));
 
-            flaggedPlayers.put(event.player().getUuid(), alert);
+            newFlaggedPlayers.put(alert, event.player().getUuid());
         });
 
         var disabledChecks = List.of(
             ReachCheck.class,
+            BasicSpeedCheck.class,
             HitConsistencyCheck.class,
             KillauraManualCheck.class,
             CpsCheck.class,
             FastBreakCheck.class,
             KillauraManualCheck.class,
-            BasicSpeedCheck.class,
             TeleportSpamCheck.class
         );
 
@@ -56,7 +56,7 @@ public class AntiCheat {
     }
 
     public void sendFlaggedAlerts() {
-        if (flaggedPlayers.isEmpty()) return;
+        if (newFlaggedPlayers.isEmpty()) return;
 
         List<Player> onlineStaff = PlayerUtil.getOnlineStaff();
         if (onlineStaff.isEmpty()) return;
@@ -64,14 +64,14 @@ public class AntiCheat {
         TextComponent.Builder alertBatch = Component.text();
 
         int i = 0;
-        final int lastIndex = flaggedPlayers.entrySet().size() - 1;
-        for (Map.Entry<UUID, Component> entry : flaggedPlayers.entrySet()) {
-            alertBatch.append(entry.getValue());
+        final int lastIndex = newFlaggedPlayers.entrySet().size() - 1;
+        for (Map.Entry<Component, UUID> entry : newFlaggedPlayers.entrySet()) {
+            alertBatch.append(entry.getKey());
 
             if (i++ != lastIndex) alertBatch.appendNewline();
         }
 
-        flaggedPlayers.clear();
+        newFlaggedPlayers.clear();
 
         for (Player player : onlineStaff) {
             player.sendMessage(alertBatch);
