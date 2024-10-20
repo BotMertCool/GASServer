@@ -1,98 +1,42 @@
 package com.goodasssub.gasevents.anticheat;
 
+import com.fasterxml.jackson.databind.util.Named;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.util.PlayerUtil;
+import discord4j.core.object.entity.channel.TextChannel;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.mangolise.anticheat.MangoAC;
 import net.mangolise.anticheat.checks.combat.CpsCheck;
 import net.mangolise.anticheat.checks.combat.HitConsistencyCheck;
 import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.combat.ReachCheck;
+import net.mangolise.anticheat.checks.movement.BasicSpeedCheck;
+import net.mangolise.anticheat.checks.movement.TeleportSpamCheck;
+import net.mangolise.anticheat.checks.other.FastBreakCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.validate.Check;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class AntiCheat {
     // TODO: into mongo too?
-    static Map<UUID, List<Flag>> flagsList = new ConcurrentHashMap<>();
 
-    private static int getFlags(String checkName, UUID uuid) {
-        // TODO: idek what im coding
-        List<Flag> flags = flagsList.get(uuid);
+    // K: Player UUID V: Alert Message
+    private final ConcurrentHashMap<UUID, Component> flaggedPlayers = new ConcurrentHashMap<>();
 
-        final int ONE_MINUTE = 60_000;
-
-        // TODO: violations go away after mins but stay if reactivated within time.
-        List<Flag> nameCheckedFlags = flags.stream()
-            .filter((flag) -> flag.getCheckName().equals(checkName))
-            .sorted(Comparator.comparingLong(Flag::getTimestamp).reversed())
-            .toList();
-
-        float violations = nameCheckedFlags.size();
-
-/*        for (Flag flag : flags) {
-            if (flag.getTimestamp() + ONE_MINUTE < System.currentTimeMillis()) {
-                flags.remove(flag);
-                flagsList.put(uuid, flags);
-                continue;
-            }
-            if (!flag.getCheckName().equals(checkName)) continue;
-            violations++;
-        }*/
-
-//        Audiences.players().sendMessage(Component.newline());
-//        flags.stream()
-//            .filter((flag) -> flag.getCheckName().equals(checkName))
-//            .sorted(Comparator.comparingLong(Flag::getTimestamp).reversed())
-//            .toList()
-//            .forEach((f) -> Audiences.players().sendMessage(Component.text(f.getCheckName() + " " + f.getTimestamp())));
-//        Audiences.players().sendMessage(Component.newline());
-
-        if (checkName.equals("BasicSpeed") ) {
-            if (violations % 3 != 0)
-                return 0;
-            return (int) (violations / 3);
-        }
-
-        return (int) violations;
-    }
-
-    public static void init() {
+    public AntiCheat() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerFlagEvent.class, event -> {
-            List<Player> onlineStaff = PlayerUtil.getOnlineStaff();
+            Component alert = Component.text("[AC] ", NamedTextColor.GOLD)
+                .append(Component.text(event.player().getUsername(), NamedTextColor.RED))
+                .append(Component.text(" has flagged check ", NamedTextColor.GOLD))
+                .append(Component.text(event.checkName(), NamedTextColor.RED))
+                .append(Component.text(" [%sms]".formatted(event.player().getLatency()), NamedTextColor.GRAY));
 
-            Player target = event.player();
-
-            List<Flag> checksFlagged = flagsList.get(target.getUuid());
-            if (checksFlagged == null) {
-                checksFlagged = new ArrayList<>();
-            }
-            checksFlagged.add(new Flag(event.checkName(), System.currentTimeMillis()));
-
-
-            flagsList.put(target.getUuid(), checksFlagged);
-            int flags = getFlags(event.checkName(), target.getUuid());
-            if (flags == 0) return;
-
-            String alertString = ("<gray>[<red>AC<gray>] <green>%s<green> <reset>has flagged check %s <gray>[<red>%s<gray>] (%s) (Ping %sms)").formatted(
-                target.getUsername(),
-                event.checkName(),
-                flags,
-                checksFlagged.size(),
-                target.getLatency()
-            );
-
-            Component alert = Main.getInstance().getMiniMessage().deserialize(alertString);
-
-            for (Player player : onlineStaff) {
-                player.sendMessage(alert);
-            }
+            flaggedPlayers.put(event.player().getUuid(), alert);
         });
 
         var disabledChecks = List.of(
@@ -100,11 +44,37 @@ public class AntiCheat {
             HitConsistencyCheck.class,
             KillauraManualCheck.class,
             CpsCheck.class,
-            KillauraManualCheck.class
+            FastBreakCheck.class,
+            KillauraManualCheck.class,
+            BasicSpeedCheck.class,
+            TeleportSpamCheck.class
         );
 
-        MangoAC.Config config = new MangoAC.Config(false, disabledChecks, List.of());
+        MangoAC.Config config = new MangoAC.Config(true, disabledChecks, List.of());
         MangoAC ac = new MangoAC(config);
         ac.start();
+    }
+
+    public void sendFlaggedAlerts() {
+        if (flaggedPlayers.isEmpty()) return;
+
+        List<Player> onlineStaff = PlayerUtil.getOnlineStaff();
+        if (onlineStaff.isEmpty()) return;
+
+        TextComponent.Builder alertBatch = Component.text();
+
+        int i = 0;
+        final int lastIndex = flaggedPlayers.entrySet().size() - 1;
+        for (Map.Entry<UUID, Component> entry : flaggedPlayers.entrySet()) {
+            alertBatch.append(entry.getValue());
+
+            if (i++ != lastIndex) alertBatch.appendNewline();
+        }
+
+        flaggedPlayers.clear();
+
+        for (Player player : onlineStaff) {
+            player.sendMessage(alertBatch);
+        }
     }
 }
