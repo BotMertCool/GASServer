@@ -1,6 +1,6 @@
 package com.goodasssub.gasevents.items;
 
-import com.goodasssub.gasevents.util.PlayerUtil;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class VisibilityItem {
-    public static final Map<UUID, Boolean> playerVisibilityMap = new HashMap<>();
+    @Getter private static final Map<UUID, Boolean> playerVisibilityMap = new HashMap<>();
 
     public static ItemStack getEnabledItem() {
         return ItemStack.builder(Material.LIME_DYE)

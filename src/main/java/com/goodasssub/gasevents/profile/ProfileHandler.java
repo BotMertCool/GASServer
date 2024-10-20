@@ -5,6 +5,7 @@ import com.goodasssub.gasevents.commands.profile.NicknameCommand;
 import com.goodasssub.gasevents.config.Config;
 import com.goodasssub.gasevents.items.VisibilityItem;
 import com.goodasssub.gasevents.entities.NametagEntity;
+import com.goodasssub.gasevents.profile.whitelist.WhitelistHandler;
 import com.goodasssub.gasevents.rank.Rank;
 import com.goodasssub.gasevents.util.SyncUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
@@ -37,12 +38,16 @@ import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class ProfileHandler {
+
+    private final WhitelistHandler whitelistHandler;
+
     private Component tabHeader;
     private Component tabFooter;
     private final Main instance;
 
     public ProfileHandler(Main instance) {
         this.instance = instance;
+        whitelistHandler = new WhitelistHandler();
         
         var eventHandler = MinecraftServer.getGlobalEventHandler();
 
@@ -86,7 +91,7 @@ public class ProfileHandler {
         });
 
         eventNode.addListener(PlayerSkinInitEvent.class, event -> {
-            if (Main.getInstance().getConfig().getMojangAuth()) return;
+            if (Main.getInstance().getConfigManager().getConfig().getMojangAuth()) return;
             try {
                 PlayerSkin player = PlayerSkin.fromUsername(event.getPlayer().getUsername());
                 event.setSkin(player);
@@ -97,9 +102,15 @@ public class ProfileHandler {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
+            if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
+                player.kick(Component.text("You are not whitelisted."));
+                return;
+            }
+
+            event.setClearChat(true);
             event.setSpawningInstance(spawnInstance);
 
-            Config config = Main.getInstance().getConfig();
+            Config config = Main.getInstance().getConfigManager().getConfig();
 
             Pos pos = new Pos(
                 config.getSpawnX(),
@@ -112,12 +123,11 @@ public class ProfileHandler {
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
 
-            VisibilityItem.playerVisibilityMap.forEach((uuid, bool) -> {
+            VisibilityItem.getPlayerVisibilityMap().forEach((uuid, bool) -> {
                 Player viewer = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
-                if (viewer != null) {
-                    player.addViewer(viewer);
-                    if (!bool) player.removeViewer(viewer);
-                }
+                if (viewer == null) return;
+                player.addViewer(viewer);
+                if (!bool) player.removeViewer(viewer);
             });
 
             player.getInventory().setItemStack(0, VisibilityItem.getEnabledItem());
@@ -185,7 +195,7 @@ public class ProfileHandler {
                 nametag.remove();
             }
 
-            VisibilityItem.playerVisibilityMap.remove(player.getUuid());
+            VisibilityItem.getPlayerVisibilityMap().remove(player.getUuid());
             NicknameCommand.nickedPlayer.remove(player.getUuid());
         });
         eventNode.addListener(PlayerChatEvent.class, event -> {
@@ -216,20 +226,35 @@ public class ProfileHandler {
     public void getTabHeader() {
         TextComponent.Builder headerBuilder = Component.text();
 
-        final List<String> headerStrings = instance.getConfig().getTabHeader();
+        final List<String> headerStrings = instance.getConfigManager().getConfig().getTabHeader();
 
         for (int i = 0; i < headerStrings.size(); i++)
             headerBuilder.append(instance.getMiniMessage().deserialize(headerStrings.get(i) + (i < headerStrings.size() - 1 ? "\n" : "")));
         tabHeader = headerBuilder.build();
     }
 
-
     public void getTabFooter() {
         TextComponent.Builder footerBuilder = Component.text();
 
-        final List<String> footerStrings = instance.getConfig().getTabFooter();
+        final List<String> footerStrings = instance.getConfigManager().getConfig().getTabFooter();
         for (int i = 0; i < footerStrings.size(); i++)
             footerBuilder.append(instance.getMiniMessage().deserialize(footerStrings.get(i) + (i < footerStrings.size() - 1 ? "\n" : "")));
         tabFooter = footerBuilder.build();
+    }
+
+    public boolean isPlayerWhitelisted(UUID uuid) {
+        String uuidString = String.valueOf(uuid);
+        List<String> players = this.getWhitelistHandler().getWhitelist().getPlayers();
+
+        return players.stream().anyMatch((playerUUID) -> playerUUID.equals(uuidString));
+    }
+
+    public void setWhitelistMode(boolean mode) {
+        this.getWhitelistHandler().getWhitelist().setEnabled(mode);
+        this.getWhitelistHandler().saveJson();
+    }
+
+    public boolean whitelistEnabled() {
+        return this.getWhitelistHandler().getWhitelist().isEnabled();
     }
 }

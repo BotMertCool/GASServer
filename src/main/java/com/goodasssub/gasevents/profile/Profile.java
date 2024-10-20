@@ -43,6 +43,14 @@ public class Profile {
         this.load();
     }
 
+    public void ban() {
+
+    }
+
+    public void mute() {
+
+    }
+
     public void load() {
         Document document = Main.getInstance().getMongoHandler().getProfile(this.uuid);
 

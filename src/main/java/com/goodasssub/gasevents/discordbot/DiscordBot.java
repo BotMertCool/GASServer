@@ -41,7 +41,7 @@ public class DiscordBot {
     public void startBot() {
         gateway.on(MessageCreateEvent.class)
             .flatMap(event -> Mono.fromRunnable(() -> {
-                final String syncChannelId = Main.getInstance().getConfig().getDiscordChannelId();
+                final String syncChannelId = Main.getInstance().getConfigManager().getConfig().getDiscordChannelId();
                 Message message = event.getMessage();
 
                 if (!message.getChannelId().equals(Snowflake.of(syncChannelId))) return;
@@ -99,7 +99,7 @@ public class DiscordBot {
 
 
         Optional<Channel> channelOptional = gateway
-            .getChannelById(Snowflake.of(Main.getInstance().getConfig().getDiscordChannelId()))
+            .getChannelById(Snowflake.of(Main.getInstance().getConfigManager().getConfig().getDiscordChannelId()))
             .blockOptional();
 
         if (channelOptional.isPresent() && channelOptional.get() instanceof TextChannel textChannel) {
@@ -110,7 +110,7 @@ public class DiscordBot {
     }
 
     public Member getMemberById(String userId) {
-        final String guildId = Main.getInstance().getConfig().getDiscordGuildId();
+        final String guildId = Main.getInstance().getConfigManager().getConfig().getDiscordGuildId();
 
         return gateway.getMemberById(Snowflake.of(guildId), Snowflake.of(userId))
             .block(Duration.ofSeconds(5));

@@ -29,7 +29,7 @@ public class PlayersCommand extends Command {
 
             StringBuilder stringBuilder = new StringBuilder("(%s/%s): ".formatted(
                 players.size(),
-                Main.getInstance().getConfig().getMaxPlayers())
+                Main.getInstance().getConfigManager().getConfig().getMaxPlayers())
             );
 
             for (int i = 0; i < ranks.size(); i++) {

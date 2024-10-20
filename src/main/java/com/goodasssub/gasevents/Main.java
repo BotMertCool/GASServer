@@ -8,24 +8,21 @@ import com.goodasssub.gasevents.commands.profile.SyncCommand;
 import com.goodasssub.gasevents.commands.staff.TeleportCommand;
 import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
 import com.goodasssub.gasevents.config.Config;
-import com.goodasssub.gasevents.config.ConfigManager;
+import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
 import com.goodasssub.gasevents.profile.ProfileHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
-import com.google.gson.JsonSyntaxException;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
-import net.minestom.server.event.player.PlayerSkinInitEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.extras.MojangAuth;
@@ -53,9 +50,10 @@ public class Main {
     //todo: AsdffdasasfdafdsfdsaafsdafsdASasdf
     public static final AtomicReference<TickMonitor> LAST_TICK = new AtomicReference<>();
 
-    @Getter private final Config config;
+
     @Getter private final Logger logger;
     @Getter private final MongoHandler mongoHandler;
+    @Getter private final ConfigHandler configManager;
     @Getter private final ProfileHandler profileHandler;
     @Getter private final DiscordBot discordBot;
     @Getter private final AntiCheat antiCheat;
@@ -71,15 +69,15 @@ public class Main {
         instance = this;
         logger = LoggerFactory.getLogger("com.goodasssub.gasevents");
         miniMessage = MiniMessage.builder().build();
-        config = new ConfigManager().getConfig();
+        configManager = new ConfigHandler();
 
-        if (config.getDiscordToken().equals("token")) {
+        if (configManager.getConfig().getDiscordToken().equals("token")) {
             // TODO: custom exceptions?
             throw new RuntimeException("Please set the discord bot token, guild id, channel id in the config.json file.");
         }
 
-        System.setProperty("minestom.chunk-view-distance", config.getViewDistance());
-        System.setProperty("minestom.entity-view-distance", config.getViewDistance());
+        System.setProperty("minestom.chunk-view-distance", configManager.getConfig().getViewDistance());
+        System.setProperty("minestom.entity-view-distance", configManager.getConfig().getViewDistance());
 
         MinecraftServer minecraftServer = MinecraftServer.init();
 
@@ -107,7 +105,7 @@ public class Main {
 
         // TODO: use polar?
         instanceContainer = instanceManager.createInstanceContainer(registry.getKey(fullBright));
-        instanceContainer.setChunkLoader(new AnvilLoader(config.getWorldPath()));
+        instanceContainer.setChunkLoader(new AnvilLoader(configManager.getConfig().getWorldPath()));
         instanceContainer.setTimeRate(0);
         instanceContainer.setTime(18000);
 
@@ -126,7 +124,7 @@ public class Main {
                 "Offical Event Server.";
 
             responseData.setDescription(Main.getInstance().getMiniMessage().deserialize(desc));
-            responseData.setMaxPlayer(config.getMaxPlayers());
+            responseData.setMaxPlayer(configManager.getConfig().getMaxPlayers());
         });
 
         // TODO: change last tick
@@ -138,7 +136,7 @@ public class Main {
         this.profileHandler = new ProfileHandler(this);
         antiCheat = new AntiCheat();
 
-        if (config.getMojangAuth()) {
+        if (configManager.getConfig().getMojangAuth()) {
             MojangAuth.init();
             logger.info("Mojang auth initialized.");
         } else {
@@ -150,8 +148,8 @@ public class Main {
 
         //BungeeCordProxy.enable();
 
-        mongoHandler = new MongoHandler(config.getMongoUri(), config.getMongoDatabase());
-        discordBot = new DiscordBot(config.getDiscordToken());
+        mongoHandler = new MongoHandler(configManager.getConfig().getMongoUri(), configManager.getConfig().getMongoDatabase());
+        discordBot = new DiscordBot(configManager.getConfig().getDiscordToken());
         discordBot.startBot();
 
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {

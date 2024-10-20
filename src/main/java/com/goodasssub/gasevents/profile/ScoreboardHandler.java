@@ -21,7 +21,7 @@ public class ScoreboardHandler {
     private List<Sidebar.ScoreboardLine> createLines(int playerCount) {
         List<Sidebar.ScoreboardLine> scoreboardLines = new ArrayList<>();
 
-        List<String> stringLines = Main.getInstance().getConfig().getSidebarLines();
+        List<String> stringLines = Main.getInstance().getConfigManager().getConfig().getSidebarLines();
         for (int i = stringLines.size() - 1; i >= 0; i--) {
             String line = stringLines.get(i);
 
