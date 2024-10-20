@@ -14,6 +14,7 @@ import com.goodasssub.gasevents.discordbot.DiscordBot;
 import com.goodasssub.gasevents.profile.ProfileHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
+import com.google.gson.JsonSyntaxException;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,7 +29,6 @@ import net.minestom.server.event.player.PlayerSkinInitEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.anvil.AnvilLoader;
@@ -143,13 +143,7 @@ public class Main {
             logger.info("Mojang auth initialized.");
         } else {
 
-            if (!Main.getInstance().getConfig().getMojangAuth()) {
-                connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUUID(username));
-
-                eventHandler.addListener(PlayerSkinInitEvent.class, event -> {
-                    event.setSkin(PlayerSkin.fromUsername(event.getPlayer().getUsername()));
-                });
-            }
+            connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUUID(username));
 
             logger.info("Mojang auth disabled.");
         }

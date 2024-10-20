@@ -8,7 +8,9 @@ import com.goodasssub.gasevents.entities.NametagEntity;
 import com.goodasssub.gasevents.rank.Rank;
 import com.goodasssub.gasevents.util.SyncUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
+import com.google.gson.JsonSyntaxException;
 import discord4j.core.object.entity.Member;
+import io.netty.util.concurrent.CompleteFuture;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -83,11 +85,17 @@ public class ProfileHandler {
             event.setCancelled(true);
         });
 
+        eventNode.addListener(PlayerSkinInitEvent.class, event -> {
+            if (Main.getInstance().getConfig().getMojangAuth()) return;
+            try {
+                PlayerSkin player = PlayerSkin.fromUsername(event.getPlayer().getUsername());
+                event.setSkin(player);
 
+            } catch (JsonSyntaxException ignored) {}
+        });
 
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
-
 
             event.setSpawningInstance(spawnInstance);
 
@@ -116,6 +124,8 @@ public class ProfileHandler {
 
             String bar = "<strikethrough>" + " ".repeat(30) + "</strikethrough>";
 
+            // TODO: change to component so you can welcome player
+
             String joinMessage = """
                 <gray>%s</gray>
                 <gold>Recommended Settings:</gold>
@@ -125,43 +135,45 @@ public class ProfileHandler {
 
             player.sendMessage(instance.getMiniMessage().deserialize(joinMessage));
 
-            Profile profile = Profile.fromUuid(player.getUuid());
+            CompletableFuture.runAsync(() -> {
+                Profile profile = Profile.fromUuid(player.getUuid());
 
-            boolean save = false;
+                boolean save = false;
 
-            if (profile.getIpAddress() == null) {
-                InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
-                profile.setIpAddress(address.getHostName());
-                save = true;
-            }
+                if (profile.getIpAddress() == null) {
+                    InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
+                    profile.setIpAddress(address.getHostName());
+                    save = true;
+                }
 
-            String profileName = profile.getName();
-            if (profileName == null || !profileName.equals(player.getUsername())) {
-                profile.setName(player.getUsername());
-                save = true;
-            }
+                String profileName = profile.getName();
+                if (profileName == null || !profileName.equals(player.getUsername())) {
+                    profile.setName(player.getUsername());
+                    save = true;
+                }
 
-            if (profile.getDiscordId() != null) {
-                profile.checkAndUpdateRank();
-                save = true;
-            } else {
-                player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
-                    "You can do this with the /sync command.", NamedTextColor.RED));
-            }
+                Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
+                    .append(Component.text(player.getUsername()));
 
-            // TODO: use permissions
-            if (profile.getRank().equals(Rank.OWNER)) {
-                player.setPermissionLevel(4);
-            }
+                player.setDisplayName(playerName);
 
-            if (save) profile.save();
+                new NametagEntity(player);
 
-            Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
-                .append(Component.text(player.getUsername()));
+                if (profile.getDiscordId() != null) {
+                    profile.checkAndUpdateRank();
+                    save = true;
+                } else {
+                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
+                        "You can do this with the /sync command.", NamedTextColor.RED));
+                }
 
-            player.setDisplayName(playerName);
+                // TODO: use permissions
+                if (profile.getRank().equals(Rank.OWNER)) {
+                    player.setPermissionLevel(4);
+                }
 
-            new NametagEntity(player);
+                if (save) profile.save();
+            });
 
 
         });
