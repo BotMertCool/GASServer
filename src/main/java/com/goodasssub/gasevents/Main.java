@@ -127,7 +127,7 @@ public class Main {
             // TODO: add to config, desc, server name, etc
             ResponseData responseData = event.getResponseData();
 
-            responseData.addEntry(NamedAndIdentified.named(Component.text("Good Ass Sub Minecraft", NamedTextColor.RED)));
+            //responseData.addEntry(NamedAndIdentified.named(Component.text("Good Ass Sub Minecraft", NamedTextColor.RED)));
             String desc = "<red><bold>GoodAssSub <reset><gray>| <white>discord.gg/GoodAssSub\n" +
                 "Offical Event Server.";
 

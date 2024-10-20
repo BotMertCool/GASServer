@@ -91,8 +91,11 @@ public class Punishment {
         document.put("uuid_target", String.valueOf(this.target));
         document.put("expire_time", this.expireTime);
         document.put("removed", this.removed);
-        document.put("uuid_remover", this.removedBy.toString());
 
+        if (this.removedBy != null) {
+            document.put("uuid_remover", this.removedBy.toString());
+        }
+        
         Main.getInstance().getMongoHandler().upsertPunishment(this.uuid, document);
     }
 

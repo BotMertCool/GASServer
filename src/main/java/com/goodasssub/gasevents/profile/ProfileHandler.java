@@ -27,6 +27,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.time.TimeUnit;
 import org.bson.Document;
+import org.w3c.dom.Text;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -108,9 +109,29 @@ public class ProfileHandler {
             for (Punishment punishment : punishments) {
                 if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
 
-                // TODO: show time left on ban / reason of ban
+                TextComponent.Builder builder = Component.text();
 
-                player.kick("You are banned.");
+                builder.append(Component.text("You are banned!", NamedTextColor.RED));
+                builder.appendNewline();
+                builder.appendNewline();
+
+                if (!punishment.isPermanent()) {
+                    builder.append(Component.text("Remaining: ", NamedTextColor.RED));
+                    builder.append(Component.text(punishment.getTimeLeft(), NamedTextColor.WHITE));
+                } else {
+                    builder.append(Component.text("Remaining: ", NamedTextColor.RED));
+                    builder.append(Component.text("Permanent", NamedTextColor.WHITE));
+                }
+
+                builder.appendNewline();
+                builder.append(Component.text("Reason: ", NamedTextColor.RED));
+                builder.append(Component.text(punishment.getReason(), NamedTextColor.WHITE));
+
+//                builder.appendNewline();
+//                builder.appendNewline();
+//                builder.append(Component.text("Appeal at: <whatewsrtaw ew fawesf a>"));
+
+                player.kick(builder.build());
                 return;
             }
         });
@@ -221,19 +242,6 @@ public class ProfileHandler {
 
                 TextComponent.Builder builder = Component.text().color(NamedTextColor.RED);
 
-                builder.append(Component.text("You are banned!"));
-
-                if (!punishment.isPermanent()) {
-                    builder.appendNewline();
-                    builder.append(Component.text("Time left: " + punishment.getTimeLeft()));
-                }
-
-                builder.appendNewline();
-                builder.append(Component.text("Reason: " + punishment.getReason()));
-
-//                builder.appendNewline();
-//                builder.appendNewline();
-//                builder.append(Component.text("Appeal at: <whatewsrtaw ew fawesf a>"));
 
                 player.kick(builder.build());
                 break;
