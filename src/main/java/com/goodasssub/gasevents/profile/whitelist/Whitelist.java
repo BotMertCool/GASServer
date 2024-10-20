@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Whitelist {
     private boolean isEnabled = false;
     private Map<String, String> players = new HashMap<>() {{
-        put("41b4126f-ce44-417f-81d3-f6cd392bb3d9", "BotMert");
+        put("41b4126f-ce44-417f-81d3-f6cd392bb3d9", "BotMert:Online");
     }};
 
 }

@@ -1,5 +1,7 @@
 package com.goodasssub.gasevents.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goodasssub.gasevents.Main;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -22,16 +24,13 @@ public class UUIDUtil {
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
     public static UUID uuidFromName(String playerName) {
-        if (Main.getInstance().getConfigManager().getConfig().getMojangAuth())
+        if (!Main.getInstance().getConfigManager().getConfig().getMojangAuth())
             return getOfflineUuid(playerName);
 
         return getOnlineUuid(playerName);
     }
 
     public static UUID getOnlineUuid(String playerName) {
-        Player onlinePlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(playerName);
-        if (onlinePlayer != null) return onlinePlayer.getUuid();
-
         try {
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(MOJANG_API_URL + playerName))
@@ -41,8 +40,9 @@ public class UUIDUtil {
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                String jsonResponse = response.body();
-                String id = jsonResponse.split("\"id\":\"")[1].split("\"")[0];
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(response.body());
+                String id = node.get("id").asText();
 
                 String formattedUUID = UUID_PATTERN.matcher(id).replaceFirst("$1-$2-$3-$4-$5");
                 return UUID.fromString(formattedUUID);

@@ -127,7 +127,7 @@ public class Profile {
     }
 
     public static Profile fromDiscordId(String discordId) {
-        Document document = Main.getInstance().getMongoHandler().getProfileBySyncCode(discordId);
+        Document document = Main.getInstance().getMongoHandler().getProfileByDiscordId(discordId);
 
         if (document == null) return null;
 

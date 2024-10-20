@@ -21,9 +21,9 @@ public class WhitelistCommand extends Command {
                 stringBuilder.append("/")
                     .append(context.getCommandName())
                     .append(" ")
-                    .append(command.getName())
-                    .append(" ")
-                    .append(command.getSyntaxesStrings().stream().map((string) -> " <" + string + ">"));
+                    .append(command.getName());
+                    //.append(" ")
+                    //.append(command.getSyntaxes().stream().map((string) -> " <" + string + ">"));
 
                 if (i != this.getSubcommands().size() - 1) {
                     stringBuilder.append("\n");

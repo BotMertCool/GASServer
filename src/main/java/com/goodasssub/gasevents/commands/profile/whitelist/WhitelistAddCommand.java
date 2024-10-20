@@ -43,7 +43,15 @@ public class WhitelistAddCommand extends Command {
             return;
         }
 
-        Main.getInstance().getProfileHandler().addPlayerWhitelist(uuid, player.getUsername());
+        var username = playerName;
+
+        if (Main.getInstance().getConfigManager().getConfig().getMojangAuth()) {
+            username += ":Online";
+        } else {
+            username += ":Offline";
+        }
+
+        Main.getInstance().getProfileHandler().addPlayerWhitelist(uuid, username);
         sender.sendMessage(Component.text("%s added to whitelist.".formatted(playerName)));
     }
 }

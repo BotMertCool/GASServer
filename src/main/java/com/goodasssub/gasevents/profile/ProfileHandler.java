@@ -93,12 +93,9 @@ public class ProfileHandler {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
-            if (this.whitelistEnabled()) {
-                CompletableFuture.runAsync(() -> {
-                    if (!isPlayerWhitelisted(player.getUuid())) {
-                        player.kick(Component.text("You are not whitelisted."));
-                    }
-                });
+            if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
+                player.kick(Component.text("You are not whitelisted."));
+                return;
             }
 
             event.setClearChat(true);
@@ -239,6 +236,8 @@ public class ProfileHandler {
     public boolean isPlayerWhitelisted(UUID uuid) {
         String uuidString = String.valueOf(uuid);
         var players = this.whitelistHandler.getWhitelist().getPlayers();
+
+        Main.getInstance().getLogger().info(uuidString);
 
         return players.entrySet().stream().anyMatch((playerUUID) -> playerUUID.getKey().equals(uuidString));
     }

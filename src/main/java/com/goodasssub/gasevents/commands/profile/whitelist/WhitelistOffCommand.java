@@ -23,7 +23,7 @@ public class WhitelistOffCommand extends Command {
                 return;
             }
 
-            if (Main.getInstance().getProfileHandler().whitelistEnabled()) {
+            if (!Main.getInstance().getProfileHandler().whitelistEnabled()) {
                 player.sendMessage(Component.text("Whitelists are already disabled.", NamedTextColor.RED));
                 return;
             }

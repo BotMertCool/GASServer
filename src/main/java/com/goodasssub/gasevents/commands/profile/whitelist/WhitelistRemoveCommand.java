@@ -43,7 +43,12 @@ public class WhitelistRemoveCommand extends Command {
             return;
         }
 
+        if (!Main.getInstance().getProfileHandler().isPlayerWhitelisted(uuid)) {
+            sender.sendMessage(Component.text("Player is not whitelisted.", NamedTextColor.RED));
+            return;
+        }
+
         Main.getInstance().getProfileHandler().removePlayerWhitelist(uuid);
-        sender.sendMessage(Component.text("%s added to whitelist.".formatted(playerName)));
+        sender.sendMessage(Component.text("%s remove to whitelist.".formatted(playerName)));
     }
 }

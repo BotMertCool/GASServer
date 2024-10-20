@@ -26,6 +26,12 @@ public class WhitelistListCommand extends Command {
             }
 
             var players = Main.getInstance().getProfileHandler().getWhitelistList();
+
+            if (players.isEmpty()) {
+                player.sendMessage("None.");
+                return;
+            }
+
             StringBuilder message = new StringBuilder();
 
             int i = 0;
