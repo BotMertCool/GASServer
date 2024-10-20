@@ -44,6 +44,6 @@ public class WhitelistCommand extends Command {
             }
         }
 
-        sender.sendMessage(stringBuilder.toString());
+        sender.sendMessage(Component.text(stringBuilder.toString(), NamedTextColor.GREEN));
     }
 }

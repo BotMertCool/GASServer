@@ -1,7 +1,6 @@
 package com.goodasssub.gasevents.commands.profile.punishments;
 
 import com.goodasssub.gasevents.Main;
-import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.UUIDUtil;
@@ -17,9 +16,9 @@ import net.minestom.server.entity.Player;
 
 import java.util.UUID;
 
-public class BanCommand extends Command {
-    public BanCommand() {
-        super("ban");
+public class MuteCommand extends Command {
+    public MuteCommand() {
+        super("mute");
 
         setDefaultExecutor((sender, context) -> {
             if (!(sender instanceof Player player)) return;
@@ -63,17 +62,17 @@ public class BanCommand extends Command {
         }
 
         if (player.getUuid().equals(uuid)) {
-            sender.sendMessage(Component.text("You cant ban yourself!", NamedTextColor.RED));
+            sender.sendMessage(Component.text("You cant mute yourself!", NamedTextColor.RED));
             return;
         }
 
-        if (Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
-            sender.sendMessage(Component.text(playerName + " is already banned.", NamedTextColor.RED));
+        if (Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.MUTE)) {
+            sender.sendMessage(Component.text(playerName + " is already muted.", NamedTextColor.RED));
             return;
         }
 
         Punishment punishment = new Punishment(
-            PunishmentType.BAN,
+            PunishmentType.MUTE,
             player.getUuid(),
             uuid,
             reason,

@@ -109,29 +109,7 @@ public class ProfileHandler {
             for (Punishment punishment : punishments) {
                 if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
 
-                TextComponent.Builder builder = Component.text();
-
-                builder.append(Component.text("You are banned!", NamedTextColor.RED));
-                builder.appendNewline();
-                builder.appendNewline();
-
-                if (!punishment.isPermanent()) {
-                    builder.append(Component.text("Remaining: ", NamedTextColor.RED));
-                    builder.append(Component.text(punishment.getTimeLeft(), NamedTextColor.WHITE));
-                } else {
-                    builder.append(Component.text("Remaining: ", NamedTextColor.RED));
-                    builder.append(Component.text("Permanent", NamedTextColor.WHITE));
-                }
-
-                builder.appendNewline();
-                builder.append(Component.text("Reason: ", NamedTextColor.RED));
-                builder.append(Component.text(punishment.getReason(), NamedTextColor.WHITE));
-
-//                builder.appendNewline();
-//                builder.appendNewline();
-//                builder.append(Component.text("Appeal at: <whatewsrtaw ew fawesf a>"));
-
-                player.kick(builder.build());
+                player.kick(punishment.getMessage());
                 return;
             }
         });
@@ -162,7 +140,7 @@ public class ProfileHandler {
                 if (!bool) player.removeViewer(viewer);
             });
 
-            player.getInventory().setItemStack(4, VisibilityItem.getEnabledItem());
+            player.getInventory().setItemStack(VisibilityItem.getInventorySlot(), VisibilityItem.getEnabledItem());
 
             String bar = "<strikethrough>" + " ".repeat(30) + "</strikethrough>";
 
@@ -238,12 +216,8 @@ public class ProfileHandler {
             for (Punishment punishment : punishments) {
                 if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
 
-                // TODO: show time left on ban / reason of ban
-
-                TextComponent.Builder builder = Component.text().color(NamedTextColor.RED);
-
-
-                player.kick(builder.build());
+                player.sendMessage(punishment.getMessage());
+                event.setCancelled(true);
                 break;
             }
 

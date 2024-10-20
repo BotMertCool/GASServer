@@ -24,7 +24,7 @@ public class WhitelistOffCommand extends Command {
             }
 
             Main.getInstance().getProfileHandler().setWhitelistMode(false);
-            player.sendMessage(Component.text("Disabled whitelists.", NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Disabled whitelists.", NamedTextColor.RED));
         });
 
     }

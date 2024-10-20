@@ -15,11 +15,12 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
-public class BanCommand extends Command {
-    public BanCommand() {
-        super("ban");
+public class UnmuteCommand extends Command {
+    public UnmuteCommand() {
+        super("unmute");
 
         setDefaultExecutor((sender, context) -> {
             if (!(sender instanceof Player player)) return;
@@ -31,7 +32,7 @@ public class BanCommand extends Command {
                 return;
             }
 
-            sender.sendMessage(Component.text("Usage: /" + commandName + " <player> [reason]", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
 
         var playerArg = ArgumentType.String("player")
@@ -40,14 +41,12 @@ public class BanCommand extends Command {
                     suggestion.addEntry(new SuggestionEntry(player.getUsername()));
                 }
             });
-        var reasonArg = ArgumentType.Word("reason");
 
-        addSyntax((sender, context) -> execute(sender, context, "None"), playerArg);
-        addSyntax((sender, context) -> execute(sender, context, context.get("reason")), playerArg, reasonArg);
+        addSyntax(this::execute, playerArg);
     }
 
-    private void execute(CommandSender sender, CommandContext context, String reason) {
-        final Player player = (Player) sender;
+    private void execute(CommandSender sender, CommandContext context) {
+        if (!(sender instanceof Player player)) return;
 
         if (player.getPermissionLevel() < 2) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
@@ -62,24 +61,19 @@ public class BanCommand extends Command {
             return;
         }
 
-        if (player.getUuid().equals(uuid)) {
-            sender.sendMessage(Component.text("You cant ban yourself!", NamedTextColor.RED));
+        if (!Profile.profileExists(uuid) ||
+            !Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.MUTE)) {
+            sender.sendMessage(Component.text(playerName + " is not muted.", NamedTextColor.RED));
             return;
         }
 
-        if (Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
-            sender.sendMessage(Component.text(playerName + " is already banned.", NamedTextColor.RED));
-            return;
+        List<Punishment> punishments = Main.getInstance().getProfileHandler().getActivePlayerPunishments(uuid);
+
+        for (Punishment punishment : punishments) {
+            if (punishment.getPunishmentType() != PunishmentType.MUTE) continue;
+
+            punishment.removePunishment(false, playerName, player.getUuid());
         }
 
-        Punishment punishment = new Punishment(
-            PunishmentType.BAN,
-            player.getUuid(),
-            uuid,
-            reason,
-            Punishment.PERMANENT
-        );
-
-        punishment.execute(false, playerName);
     }
 }

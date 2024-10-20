@@ -15,6 +15,7 @@ import java.util.UUID;
 
 public class VisibilityItem {
     @Getter private static final Map<UUID, Boolean> playerVisibilityMap = new HashMap<>();
+    @Getter private static final int inventorySlot = 4;
 
     public static ItemStack getEnabledItem() {
         return ItemStack.builder(Material.LIME_DYE)
@@ -35,8 +36,6 @@ public class VisibilityItem {
             .glowing(true)
             .build();
     }
-
-    public static int inventorySlot = 0;
 
     public static void toggleVisibility(Player player) {
         boolean currentVisibility = playerVisibilityMap.getOrDefault(player.getUuid(), true);

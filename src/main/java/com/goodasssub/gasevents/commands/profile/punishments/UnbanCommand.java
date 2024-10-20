@@ -7,10 +7,12 @@ import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 
 import java.util.List;
@@ -33,7 +35,12 @@ public class UnbanCommand extends Command {
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
 
-        var playerArg = ArgumentType.Word("player");
+        var playerArg = ArgumentType.String("player")
+            .setSuggestionCallback((sender, context, suggestion) -> {
+                for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                    suggestion.addEntry(new SuggestionEntry(player.getUsername()));
+                }
+            });
 
         addSyntax(this::execute, playerArg);
     }
@@ -54,26 +61,11 @@ public class UnbanCommand extends Command {
             return;
         }
 
-        if (player.getUuid().equals(uuid)) {
-            sender.sendMessage(Component.text("You cant ban yourself!", NamedTextColor.RED));
-            return;
-        }
-
-
-
-
-
         if (!Profile.profileExists(uuid) ||
             !Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
             sender.sendMessage(Component.text(playerName + " is not banned.", NamedTextColor.RED));
-            boolean isBanned = Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN);
-
-            player.sendMessage("banned: " + isBanned);
-            player.sendMessage("exists: " + Profile.profileExists(uuid));
             return;
         }
-
-        //Profile profile = Profile.fromUuid(uuid);
 
         List<Punishment> punishments = Main.getInstance().getProfileHandler().getActivePlayerPunishments(uuid);
 

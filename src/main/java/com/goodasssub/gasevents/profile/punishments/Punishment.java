@@ -95,7 +95,7 @@ public class Punishment {
         if (this.removedBy != null) {
             document.put("uuid_remover", this.removedBy.toString());
         }
-        
+
         Main.getInstance().getMongoHandler().upsertPunishment(this.uuid, document);
     }
 
@@ -132,6 +132,35 @@ public class Punishment {
         if (target != null) target.kick("test");
 
         this.save();
+    }
+
+    public Component getMessage() {
+        TextComponent.Builder builder = Component.text().color(NamedTextColor.RED);
+
+        String punishmentTypeString = "Error";
+        if (this.punishmentType == PunishmentType.BAN) {
+            punishmentTypeString = "banned";
+        } else if (this.punishmentType == PunishmentType.MUTE) {
+            punishmentTypeString = "muted";
+        }
+
+        builder.append(Component.text("You are %s!" + punishmentTypeString, NamedTextColor.RED));
+        builder.appendNewline();
+        builder.appendNewline();
+
+        if (!this.isPermanent()) {
+            builder.append(Component.text("Remaining: ", NamedTextColor.RED));
+            builder.append(Component.text(this.getTimeLeft(), NamedTextColor.WHITE));
+        } else {
+            builder.append(Component.text("Remaining: ", NamedTextColor.RED));
+            builder.append(Component.text("Permanent", NamedTextColor.WHITE));
+        }
+
+        builder.appendNewline();
+        builder.append(Component.text("Reason: ", NamedTextColor.RED));
+        builder.append(Component.text(this.getReason(), NamedTextColor.WHITE));
+
+        return builder.build();
     }
 
     private void broadcast(boolean silent, String playerName, boolean removal) {

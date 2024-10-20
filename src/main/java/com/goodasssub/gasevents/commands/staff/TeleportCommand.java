@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.location.RelativeVec;
@@ -31,7 +32,12 @@ public class TeleportCommand extends Command {
         });
 
         var posArg = ArgumentType.RelativeVec3("pos");
-        var playerArg = ArgumentType.Word("player");
+        var playerArg = ArgumentType.String("player")
+            .setSuggestionCallback((sender, context, suggestion) -> {
+                for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                    suggestion.addEntry(new SuggestionEntry(player.getUsername()));
+                }
+            });
 
         addSyntax(this::onPlayerTeleport, playerArg);
         addSyntax(this::onPositionTeleport, posArg);

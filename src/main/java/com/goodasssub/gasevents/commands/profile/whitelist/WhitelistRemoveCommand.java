@@ -4,10 +4,12 @@ import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 
 import java.util.UUID;
@@ -29,7 +31,12 @@ public class WhitelistRemoveCommand extends Command {
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
 
-        var playerArg = ArgumentType.Word("player");
+        var playerArg = ArgumentType.String("player")
+            .setSuggestionCallback((sender, context, suggestion) -> {
+                for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                    suggestion.addEntry(new SuggestionEntry(player.getUsername()));
+                }
+            });
 
         addSyntax(this::onPlayerTeleport, playerArg);
     }
@@ -56,6 +63,6 @@ public class WhitelistRemoveCommand extends Command {
         }
 
         Main.getInstance().getProfileHandler().removePlayerWhitelist(uuid);
-        sender.sendMessage(Component.text("%s remove to whitelist.".formatted(playerName)));
+        sender.sendMessage(Component.text("removed %s from whitelist.".formatted(playerName), NamedTextColor.GREEN));
     }
 }

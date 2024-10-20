@@ -86,7 +86,7 @@ public class Profile {
 
         Document document = Main.getInstance().getMongoHandler().getProfile(uuid);
 
-        return document == null;
+        return document != null;
     }
 
     public static Profile fromUuid(UUID uuid) {

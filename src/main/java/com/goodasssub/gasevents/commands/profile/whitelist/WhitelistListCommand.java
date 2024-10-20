@@ -35,7 +35,7 @@ public class WhitelistListCommand extends Command {
 
         int i = 0;
         for (Map.Entry<String, String> entry : players.entrySet()) {
-            message.append("%s. %s - %s".formatted(++i, entry.getValue(), entry.getKey()));
+            message.append("%s. %s".formatted(++i, entry.getValue()));
             if (i != players.size()) message.append("\n");
         }
 

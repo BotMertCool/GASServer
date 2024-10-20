@@ -1,13 +1,13 @@
 package com.goodasssub.gasevents.commands.profile.punishments;
 
 import com.goodasssub.gasevents.Main;
-import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -17,9 +17,9 @@ import net.minestom.server.entity.Player;
 
 import java.util.UUID;
 
-public class BanCommand extends Command {
-    public BanCommand() {
-        super("ban");
+public class KickCommand extends Command {
+    public KickCommand() {
+        super("kick");
 
         setDefaultExecutor((sender, context) -> {
             if (!(sender instanceof Player player)) return;
@@ -31,7 +31,7 @@ public class BanCommand extends Command {
                 return;
             }
 
-            sender.sendMessage(Component.text("Usage: /" + commandName + " <player> [reason]", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
 
         var playerArg = ArgumentType.String("player")
@@ -40,13 +40,11 @@ public class BanCommand extends Command {
                     suggestion.addEntry(new SuggestionEntry(player.getUsername()));
                 }
             });
-        var reasonArg = ArgumentType.Word("reason");
 
-        addSyntax((sender, context) -> execute(sender, context, "None"), playerArg);
-        addSyntax((sender, context) -> execute(sender, context, context.get("reason")), playerArg, reasonArg);
+        addSyntax(this::execute, playerArg);
     }
 
-    private void execute(CommandSender sender, CommandContext context, String reason) {
+    private void execute(CommandSender sender, CommandContext context) {
         final Player player = (Player) sender;
 
         if (player.getPermissionLevel() < 2) {
@@ -63,23 +61,13 @@ public class BanCommand extends Command {
         }
 
         if (player.getUuid().equals(uuid)) {
-            sender.sendMessage(Component.text("You cant ban yourself!", NamedTextColor.RED));
+            sender.sendMessage(Component.text("You cant kick yourself!", NamedTextColor.RED));
             return;
         }
 
-        if (Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
-            sender.sendMessage(Component.text(playerName + " is already banned.", NamedTextColor.RED));
-            return;
-        }
+        Audiences.players().sendMessage(Component.text(playerName, NamedTextColor.GREEN)
+            .append(Component.text(" has been kicked from the game.", NamedTextColor.WHITE)));
 
-        Punishment punishment = new Punishment(
-            PunishmentType.BAN,
-            player.getUuid(),
-            uuid,
-            reason,
-            Punishment.PERMANENT
-        );
-
-        punishment.execute(false, playerName);
+        player.kick(Component.text("You have been kicked!", NamedTextColor.RED));
     }
 }
