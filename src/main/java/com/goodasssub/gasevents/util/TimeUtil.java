@@ -74,7 +74,6 @@ public class TimeUtil {
             long seconds = millis / ONE_SECOND;
             result.append(seconds).append(" second").append(seconds > 1 ? "s" : "");
         }
-        
         if (result.isEmpty()) {
             result.append("0 seconds");
         }

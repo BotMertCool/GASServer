@@ -3,6 +3,7 @@ package com.goodasssub.gasevents.items;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -20,10 +21,10 @@ public class VisibilityItem {
     public static ItemStack getEnabledItem() {
         return ItemStack.builder(Material.LIME_DYE)
             .customName(MiniMessage.miniMessage()
-                .deserialize("<reset><gold>Player Visibility: <green>Enabled"))
-            .lore(Component.text("Right click to toggle player visibility", NamedTextColor.GRAY))
-            .lore(MiniMessage.miniMessage()
-                    .deserialize("<reset><gray>Right click to toggle player visibility"))
+                .deserialize("<gold>Player Visibility: <green>Enabled")
+                .decoration(TextDecoration.ITALIC, false))
+            .lore(Component.text("Right click to toggle player visibility.", NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false))
             .glowing(true)
             .build();
     }
@@ -31,8 +32,10 @@ public class VisibilityItem {
     public static ItemStack getDisabledItem() {
         return ItemStack.builder(Material.GRAY_DYE)
             .customName(MiniMessage.miniMessage()
-                .deserialize("<gold>Player Visibility: <red>Disabled"))
-            .lore(Component.text("Right click to toggle player visibility", NamedTextColor.GRAY))
+                .deserialize("<gold>Player Visibility: <red>Disabled")
+                .decoration(TextDecoration.ITALIC, false))
+            .lore(Component.text("Right click to toggle player visibility.", NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false))
             .glowing(true)
             .build();
     }
@@ -57,7 +60,13 @@ public class VisibilityItem {
             }
         });
 
-        String message = newVisibility ? "Players are now visible" : "Players are now invisible";
+        Component enabled = MiniMessage.miniMessage()
+            .deserialize("<gold>Player Visibility: <green>Enabled");
+
+        Component disabled = MiniMessage.miniMessage()
+            .deserialize("<gold>Player Visibility: <red>Disabled");
+
+        Component message = newVisibility ? enabled : disabled;
         player.sendMessage(message);
     }
 }
