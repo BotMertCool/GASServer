@@ -214,11 +214,12 @@ public class ProfileHandler {
             List<Punishment> punishments = getActivePlayerPunishments(player.getUuid());
 
             for (Punishment punishment : punishments) {
-                if (punishment.getPunishmentType() != PunishmentType.BAN) continue;
+                if (punishment.getPunishmentType() != PunishmentType.MUTE) continue;
 
-                player.sendMessage(punishment.getMessage());
+                player.sendMessage(Component.text().appendNewline().append(punishment.getMessage()));
+
                 event.setCancelled(true);
-                break;
+                return;
             }
 
             Profile profile = Profile.fromUuid(player.getUuid());

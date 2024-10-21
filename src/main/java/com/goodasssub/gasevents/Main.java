@@ -94,8 +94,10 @@ public class Main {
         commandManager.register(new ThruCommand());
         commandManager.register(new FlyCommand());
         commandManager.register(new BanCommand());
+        commandManager.register(new TempBanCommand());
         commandManager.register(new UnbanCommand());
         commandManager.register(new MuteCommand());
+        commandManager.register(new TempMuteCommand());
         commandManager.register(new UnmuteCommand());
         commandManager.register(new KickCommand());
 

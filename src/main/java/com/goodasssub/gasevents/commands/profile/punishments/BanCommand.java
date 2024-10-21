@@ -40,14 +40,18 @@ public class BanCommand extends Command {
                     suggestion.addEntry(new SuggestionEntry(player.getUsername()));
                 }
             });
-        var reasonArg = ArgumentType.Word("reason");
 
-        addSyntax((sender, context) -> execute(sender, context, "None"), playerArg);
+        var reasonArg = ArgumentType.StringArray("reason");
+
+        String[] none = {"None"};
+
+        addSyntax((sender, context) -> execute(sender, context, none), playerArg);
         addSyntax((sender, context) -> execute(sender, context, context.get("reason")), playerArg, reasonArg);
     }
 
-    private void execute(CommandSender sender, CommandContext context, String reason) {
+    private void execute(CommandSender sender, CommandContext context, String[] reason) {
         final Player player = (Player) sender;
+        final String reasonString = String.join(" ", reason);
 
         if (player.getPermissionLevel() < 2) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
@@ -76,10 +80,16 @@ public class BanCommand extends Command {
             PunishmentType.BAN,
             player.getUuid(),
             uuid,
-            reason,
+            reasonString,
             Punishment.PERMANENT
         );
 
         punishment.execute(false, playerName);
+
+        Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
+
+        if (target != null) {
+            target.kick(punishment.getMessage());
+        }
     }
 }

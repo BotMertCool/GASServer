@@ -54,13 +54,13 @@ public class KickCommand extends Command {
 
         final String playerName = context.get("player");
 
-        UUID uuid = UUIDUtil.uuidFromName(playerName);
-        if (uuid == null) {
-            sender.sendMessage(Component.text("No player found!", NamedTextColor.RED));
+        Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(playerName);
+        if (target == null) {
+            sender.sendMessage(Component.text("Player is not online!", NamedTextColor.RED));
             return;
         }
 
-        if (player.getUuid().equals(uuid)) {
+        if (player.getUuid().equals(target.getUuid())) {
             sender.sendMessage(Component.text("You cant kick yourself!", NamedTextColor.RED));
             return;
         }
@@ -68,6 +68,6 @@ public class KickCommand extends Command {
         Audiences.players().sendMessage(Component.text(playerName, NamedTextColor.GREEN)
             .append(Component.text(" has been kicked from the game.", NamedTextColor.WHITE)));
 
-        player.kick(Component.text("You have been kicked!", NamedTextColor.RED));
+        target.kick(Component.text("You have been kicked!", NamedTextColor.RED));
     }
 }

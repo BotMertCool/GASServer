@@ -119,7 +119,7 @@ public class Punishment {
         if (isPermanent()) return "Permanent";
 
         try {
-            long timeLeft = System.currentTimeMillis() - this.expireTime;
+            long timeLeft = this.expireTime - System.currentTimeMillis();
             return TimeUtil.formatTime(timeLeft);
         } catch (IllegalArgumentException ignored) {
             return "Expired";
@@ -127,9 +127,7 @@ public class Punishment {
     }
 
     public void execute(boolean silent, String playerName) {
-        Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.target);
         this.broadcast(silent, playerName, false);
-        if (target != null) target.kick("test");
 
         this.save();
     }
@@ -144,7 +142,7 @@ public class Punishment {
             punishmentTypeString = "muted";
         }
 
-        builder.append(Component.text("You are %s!" + punishmentTypeString, NamedTextColor.RED));
+        builder.append(Component.text("You are %s!".formatted(punishmentTypeString), NamedTextColor.RED));
         builder.appendNewline();
         builder.appendNewline();
 
@@ -223,6 +221,8 @@ public class Punishment {
             }
         }
 
+
+        broadcastMsg.append(Component.text(".", NamedTextColor.WHITE));
         if (!silent) {
             Audiences.players().sendMessage(broadcastMsg);
             return;

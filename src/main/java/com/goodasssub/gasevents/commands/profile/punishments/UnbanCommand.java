@@ -61,8 +61,7 @@ public class UnbanCommand extends Command {
             return;
         }
 
-        if (!Profile.profileExists(uuid) ||
-            !Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
+        if (!Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.BAN)) {
             sender.sendMessage(Component.text(playerName + " is not banned.", NamedTextColor.RED));
             return;
         }

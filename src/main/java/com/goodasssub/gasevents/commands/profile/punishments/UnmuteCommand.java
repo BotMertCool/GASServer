@@ -61,8 +61,7 @@ public class UnmuteCommand extends Command {
             return;
         }
 
-        if (!Profile.profileExists(uuid) ||
-            !Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.MUTE)) {
+        if (!Main.getInstance().getProfileHandler().isPlayerPunishmentType(uuid, PunishmentType.MUTE)) {
             sender.sendMessage(Component.text(playerName + " is not muted.", NamedTextColor.RED));
             return;
         }
