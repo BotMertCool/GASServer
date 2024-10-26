@@ -11,53 +11,17 @@ import java.util.stream.Collectors;
 public enum Rank {
 
     // TODO: Store ranks in mongodb
+
+
+
     OWNER(
         "Owner",
         "1209578826573549588",
-        "dark_red",
-        true,
-        1000,
-        "<gray>[<%color%>Owner<gray>]</gray> "
-    ),
-    MANAGER(
-        "Manager",
-        "1209578826573549588",
         "red",
-        true,
-        900,
-        "<gray>[<%color%>Manager<gray>]</gray> "
-    ),
-    ADMIN(
-        "Admin",
-        "1039916663665074256",
-        "#FFFFFF",
-        true,
-        500,
-        "<gray>[<%color%>Admin<gray>]</gray> "
-    ),
-    MOD(
-        "Mod",
-        "1030225908293971988",
-        "#1F8B4C",
-        true,
-        400,
-        "<gray>[<%color%>Mod<gray>]</gray> "
-    ),
-    CHAT_MOD(
-        "Chat Mod",
-        "1133504846230736917",
-        "#FFCA99",
-        true,
-        300,
-        "<gray>[<%color%>Chat Mod<gray>]</gray> "
-    ),
-    BOOSTER(
-        "Booster",
-        "1042182066139308193",
-        "light_purple",
         false,
-        200,
-        "<%color%>"
+        100,
+        "<%color%>",
+        List.of("*")
     ),
     SYNCED(
         "Synced",
@@ -65,7 +29,8 @@ public enum Rank {
         "green",
         false,
         100,
-        "<%color%>"
+        "<%color%>",
+        List.of()
     ),
     DEFAULT(
         "Default",
@@ -73,7 +38,8 @@ public enum Rank {
         "white",
         false,
         0,
-        "<gray>"
+        "<gray>",
+        List.of()
     );
 
     private final String name;
@@ -82,14 +48,16 @@ public enum Rank {
     private final boolean staff;
     private final int weight;
     private final String prefix;
+    private List<String> permissions;
 
-    Rank(String name, String roleId, String color, Boolean staff, int weight, String prefix) {
+    Rank(String name, String roleId, String color, Boolean staff, int weight, String prefix, List<String> permissions) {
         this.name = name;
         this.roleId = roleId;
         this.color = color;
         this.staff = staff;
         this.weight = weight;
         this.prefix = prefix.replace("%color%", color);
+        this.permissions = permissions;
     }
 
     public static List<Rank> sortedByWeight() {
