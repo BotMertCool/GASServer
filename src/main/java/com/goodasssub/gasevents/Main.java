@@ -103,6 +103,7 @@ public class Main {
         commandManager.register(new UnmuteCommand());
         commandManager.register(new KickCommand());
         commandManager.register(new SetBlockCommand());
+        commandManager.register(new SummonCommand());
 
         SimpleCommands.register(commandManager);
 
@@ -129,8 +130,6 @@ public class Main {
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         var connectionManager = MinecraftServer.getConnectionManager();
-
-        // FIXME: doesnt kick player if wrong version
 
         eventHandler.addListener(ServerListPingEvent.class, event -> {
             // TODO: add to config, desc, server name, etc
