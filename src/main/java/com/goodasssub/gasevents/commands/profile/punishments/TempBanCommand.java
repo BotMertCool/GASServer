@@ -28,6 +28,7 @@ public class TempBanCommand extends Command {
         super("tempban");
 
         setDefaultExecutor((sender, context) -> {
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
 

@@ -32,7 +32,6 @@ public class TempMuteCommand extends Command {
             if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player> <duration> [reason]", NamedTextColor.RED));
         });
 
