@@ -1,6 +1,7 @@
 package com.goodasssub.gasevents.commands.staff;
 
 import com.goodasssub.gasevents.util.PlayerUtil;
+import io.netty.util.concurrent.CompleteFuture;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -13,6 +14,7 @@ import net.minestom.server.instance.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class FillCommand extends Command {
     private final String PERMISSION = "core.fill";
@@ -45,62 +47,64 @@ public class FillCommand extends Command {
         addSyntax((sender, context) -> {
             if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
-            Player player = (Player) sender;
-            // Get positions
-            Point from = context.get(fromPosArg).fromSender(sender);
-            Point to = context.get(toPosArg).fromSender(sender);
-            Block block = context.get(blockArg);
-            FillMode mode = context.get(modeArg);
+            CompletableFuture.runAsync(() -> {
+                Player player = (Player) sender;
+                // Get positions
+                Point from = context.get(fromPosArg).fromSender(sender);
+                Point to = context.get(toPosArg).fromSender(sender);
+                Block block = context.get(blockArg);
+                FillMode mode = context.get(modeArg);
 
-            Instance instance = player.getInstance();
-            if (instance == null) return;
+                Instance instance = player.getInstance();
+                if (instance == null) return;
 
-            // Get bounds
-            int minX = Math.min((int) from.x(), (int) to.x());
-            int minY = Math.min((int) from.y(), (int) to.y());
-            int minZ = Math.min((int) from.z(), (int) to.z());
-            int maxX = Math.max((int) from.x(), (int) to.x());
-            int maxY = Math.max((int) from.y(), (int) to.y());
-            int maxZ = Math.max((int) from.z(), (int) to.z());
+                // Get bounds
+                int minX = Math.min((int) from.x(), (int) to.x());
+                int minY = Math.min((int) from.y(), (int) to.y());
+                int minZ = Math.min((int) from.z(), (int) to.z());
+                int maxX = Math.max((int) from.x(), (int) to.x());
+                int maxY = Math.max((int) from.y(), (int) to.y());
+                int maxZ = Math.max((int) from.z(), (int) to.z());
 
-            // Check volume limits (32768 blocks is vanilla limit)
-            int volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
-            if (volume > 32768) {
-                sender.sendMessage("Too many blocks! Maximum volume is 32768 blocks");
-                return;
-            }
-
-            int blocksAffected = 0;
-
-            switch (mode) {
-                case REPLACE -> {
-                    // Simply replace all blocks in the area
-                    blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block, null);
+                // Check volume limits (32768 blocks is vanilla limit)
+                int volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+                if (volume > 32768) {
+                    sender.sendMessage("Too many blocks! Maximum volume is 32768 blocks");
+                    return;
                 }
-                case KEEP -> {
-                    // Only replace air blocks
-                    blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block,
-                        (pos, currentBlock) -> currentBlock.isAir());
-                }
-                case DESTROY -> {
-                    // Replace all blocks and trigger block break effects
-                    blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block,
-                        (pos, currentBlock) -> {
-                            // You could add particle effects and sounds here
-                            return true;
-                        });
-                }
-                case HOLLOW -> {
-                    // Fill only the shell, leaving the inside empty
-                    blocksAffected = fillHollow(instance, minX, minY, minZ, maxX, maxY, maxZ, block);
-                }
-                case OUTLINE -> {
-                    // Fill only the edges
-                    blocksAffected = fillOutline(instance, minX, minY, minZ, maxX, maxY, maxZ, block);
-                }
-            }
 
-            sender.sendMessage("Filled " + blocksAffected + " blocks");
+                int blocksAffected = 0;
+
+                switch (mode) {
+                    case REPLACE -> {
+                        // Simply replace all blocks in the area
+                        blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block, null);
+                    }
+                    case KEEP -> {
+                        // Only replace air blocks
+                        blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block,
+                            (pos, currentBlock) -> currentBlock.isAir());
+                    }
+                    case DESTROY -> {
+                        // Replace all blocks and trigger block break effects
+                        blocksAffected = fillArea(instance, minX, minY, minZ, maxX, maxY, maxZ, block,
+                            (pos, currentBlock) -> {
+                                // You could add particle effects and sounds here
+                                return true;
+                            });
+                    }
+                    case HOLLOW -> {
+                        // Fill only the shell, leaving the inside empty
+                        blocksAffected = fillHollow(instance, minX, minY, minZ, maxX, maxY, maxZ, block);
+                    }
+                    case OUTLINE -> {
+                        // Fill only the edges
+                        blocksAffected = fillOutline(instance, minX, minY, minZ, maxX, maxY, maxZ, block);
+                    }
+                }
+
+                sender.sendMessage("Filled " + blocksAffected + " blocks");
+            });
 
         }, fromPosArg, toPosArg, blockArg, modeArg);
     }

@@ -17,8 +17,8 @@ public class ThruCommand extends Command {
     }
 
     private void execute(CommandSender sender, CommandContext context) {
-
         if (!(sender instanceof Player player)) return;
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
         if (!PlayerUtil.passThroughForwardWall(player, 6)) {
             sender.sendMessage(Component.text("No free spot ahead of you found.", NamedTextColor.RED));
