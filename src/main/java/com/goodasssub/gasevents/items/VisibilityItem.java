@@ -52,7 +52,7 @@ public class VisibilityItem {
         }
 
         MinecraftServer.getConnectionManager().getOnlinePlayers().forEach(target -> {
-            if (target.getPermissionLevel() == 4) return;
+            if (target.hasPermission("core.staff")) return;
 
             target.addViewer(player);
             if (!newVisibility) {

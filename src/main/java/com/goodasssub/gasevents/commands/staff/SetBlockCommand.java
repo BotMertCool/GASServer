@@ -58,6 +58,6 @@ public class SetBlockCommand extends Command {
                     sender.sendMessage("Block replaced successfully");
                 }
             }
-        },positionArg, blockArg, modeArg);
+        }, positionArg, blockArg, modeArg);
     }
 }

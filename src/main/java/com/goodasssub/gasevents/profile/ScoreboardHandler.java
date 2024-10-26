@@ -13,7 +13,7 @@ import java.util.*;
 
 public class ScoreboardHandler {
 
-    private final Sidebar sidebar = new Sidebar(Component.text("Good Ass Sub", NamedTextColor.RED)
+    private final Sidebar sidebar = new Sidebar(Component.text("YZY CRAFT", NamedTextColor.RED)
         .decorate(TextDecoration.BOLD));
 
 

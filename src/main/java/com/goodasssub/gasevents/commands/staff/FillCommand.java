@@ -44,6 +44,7 @@ public class FillCommand extends Command {
         // Add syntax
         addSyntax((sender, context) -> {
             if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
+
             Player player = (Player) sender;
             // Get positions
             Point from = context.get(fromPosArg).fromSender(sender);

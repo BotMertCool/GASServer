@@ -18,22 +18,25 @@ public class Config {
     private String viewDistance = "16";
     private String simulationDistance = "16";
     private int maxPlayers = 1000;
-    private float spawnX = 0.5f;
-    private float spawnY = 0.5f;
-    private float spawnZ = 0.5f;
+    private double staffSpawnX = 0.5f;
+    private double staffSpawnY = 0.5f;
+    private double staffSpawnZ = 0.5f;
+    private double normalSpawnX = 0.5f;
+    private double normalSpawnY = 0.5f;
+    private double normalSpawnZ = 0.5f;
     private List<String> sidebarLines = List.of(
         "<gray><strikethrough>" + " ".repeat(35),
         "<gold>Players: <white>%player%",
         "",
-        "<gray>play.goodasssub.com",
+        "<gray>see.kanye.live",
         "<gray><strikethrough>" + " ".repeat(35)
     );
     private List<String> tabHeader = List.of(
         "<gray><strikethrough>" + " ".repeat(45),
-        "<red><bold>GoodAssSub Network"
+        "<red><bold>YZY CRAFT Network"
     );
     private List<String> tabFooter = List.of(
-        "<gray>play.goodasssub.com",
+        "<gray>see.kanye.live",
         "<gray><strikethrough>" + " ".repeat(45)
     );
 }

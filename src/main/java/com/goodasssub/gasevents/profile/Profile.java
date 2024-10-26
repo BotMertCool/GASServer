@@ -149,7 +149,7 @@ public class Profile {
 
     public void checkAndUpdateRank() {
         if (this.discordId == null) return;
-        Rank newRank = Rank.SYNCED;
+        Rank newRank = Rank.PERFORMER;
 
         DiscordBot discord = Main.getInstance().getDiscordBot();
         Member member = discord.getMemberById(this.discordId);

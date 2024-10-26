@@ -105,6 +105,8 @@ public class Main {
         commandManager.register(new SetBlockCommand());
         commandManager.register(new SummonCommand());
         commandManager.register(new FillCommand());
+        commandManager.register(new SetSpawnCommand());
+        commandManager.register(new LightsCommand());
 
         SimpleCommands.register(commandManager);
 
@@ -114,7 +116,7 @@ public class Main {
 
         DynamicRegistry<DimensionType> registry = MinecraftServer.getDimensionTypeRegistry();
         DimensionType fullBright = DimensionType.builder()
-            .ambientLight(0.15f)
+            .ambientLight(0.0f)
             .build();
         registry.register(NamespaceID.from("minestorm:custom"), fullBright);
 
@@ -137,7 +139,7 @@ public class Main {
             ResponseData responseData = event.getResponseData();
 
             //responseData.addEntry(NamedAndIdentified.named(Component.text("Good Ass Sub Minecraft", NamedTextColor.RED)));
-            String desc = "<red><bold>GoodAssSub <reset><gray>| <white>discord.gg/GoodAssSub\n" +
+            String desc = "<red><bold>YZY CRAFT <reset><gray>| <white>discord.gg/GoodAssSub\n" +
                 "Offical Event Server.";
 
             responseData.setDescription(Main.getInstance().getMiniMessage().deserialize(desc));

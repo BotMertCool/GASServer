@@ -14,23 +14,32 @@ public enum Rank {
 
 
 
-    OWNER(
-        "Owner",
-        "1209578826573549588",
+    ZAEL(
+        "Zael",
+        "1296573356614746334",
         "red",
-        false,
-        100,
+        true,
+        1000,
         "<%color%>",
         List.of("*")
     ),
-    SYNCED(
-        "Synced",
+    OWNER(
+        "Owner",
+        "1296572843408097393",
+        "red",
+        true,
+        500,
+        "<%color%>",
+        List.of("*")
+    ),
+    PERFORMER(
+        "Performer",
         null,
         "green",
-        false,
+        true,
         100,
         "<%color%>",
-        List.of()
+        List.of("*")
     ),
     DEFAULT(
         "Default",

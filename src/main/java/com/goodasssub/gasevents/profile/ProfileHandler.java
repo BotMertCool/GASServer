@@ -125,9 +125,9 @@ public class ProfileHandler {
             Config config = Main.getInstance().getConfigManager().getConfig();
 
             Pos pos = new Pos(
-                config.getSpawnX(),
-                config.getSpawnY(),
-                config.getSpawnZ()
+                config.getNormalSpawnX(),
+                config.getNormalSpawnY(),
+                config.getNormalSpawnZ()
             );
 
             player.setRespawnPoint(pos);
@@ -203,6 +203,19 @@ public class ProfileHandler {
 
                 if (player.hasPermission("*")) {
                     player.setPermissionLevel(4);
+                }
+
+                Config config = Main.getInstance().getConfigManager().getConfig();
+
+                if (player.hasPermission("core.staff")) {
+                    Pos pos = new Pos(
+                        config.getStaffSpawnX(),
+                        config.getStaffSpawnY(),
+                        config.getStaffSpawnZ()
+                    );
+
+                    player.setRespawnPoint(pos);
+                    player.teleport(pos);
                 }
 
                 if (save) profile.save();
