@@ -18,7 +18,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
     implementation("org.projectlombok:lombok:1.18.34")
-    implementation("net.minestom:minestom-snapshots:1c47dd613f")
+    implementation("net.minestom:minestom-snapshots:dba90a461b")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
     implementation("org.mongodb:mongodb-driver-sync:5.1.3")
     implementation("net.mangolise:mango-anti-cheat:latest")
@@ -28,14 +28,14 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21)) // Minestom has a minimum Java version of 21
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
 tasks {
     jar {
         manifest {
-            attributes["Main-Class"] = "com.goodasssub.Main" // Change this to your main class
+            attributes["Main-Class"] = "com.goodasssub.Main"
         }
     }
 
@@ -44,7 +44,7 @@ tasks {
     }
     shadowJar {
         mergeServiceFiles()
-        archiveClassifier.set("") // Prevent the -all suffix on the shadowjar file.
+        archiveClassifier.set("")
     }
 }
 
