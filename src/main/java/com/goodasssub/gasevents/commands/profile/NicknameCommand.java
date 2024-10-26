@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.UUID;
 
 public class NicknameCommand extends Command {
+    final String PERMISSION = "core.nickname";
+
     public static HashSet<UUID> nickedPlayer = new HashSet<>();
 
     public NicknameCommand() {
@@ -26,7 +28,7 @@ public class NicknameCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -37,7 +39,7 @@ public class NicknameCommand extends Command {
         addSyntax((sender, context) -> {
             Player player = (Player) sender;
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }

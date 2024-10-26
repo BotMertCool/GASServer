@@ -15,6 +15,8 @@ import net.minestom.server.utils.entity.EntityFinder;
 import java.util.List;
 
 public class GamemodeCommand extends Command {
+    final String PERMISSION = "core.gamemode";
+
     public GamemodeCommand() {
         super("gamemode", "gm");
 
@@ -33,7 +35,7 @@ public class GamemodeCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -47,7 +49,7 @@ public class GamemodeCommand extends Command {
                 return;
             }
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }

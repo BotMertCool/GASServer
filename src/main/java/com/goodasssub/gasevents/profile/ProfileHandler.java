@@ -96,7 +96,7 @@ public class ProfileHandler {
             } catch (JsonSyntaxException ignored) {}
         });
 
-        eventNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
             if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
@@ -112,10 +112,6 @@ public class ProfileHandler {
                 player.kick(punishment.getMessage());
                 return;
             }
-        });
-
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            final Player player = event.getPlayer();
 
             event.setClearChat(true);
             event.setSpawningInstance(spawnInstance);
@@ -183,12 +179,12 @@ public class ProfileHandler {
                     profile.checkAndUpdateRank();
                     save = true;
                 } else {
-                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
-                        "You can do this with the /sync command.", NamedTextColor.RED));
+//                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
+//                        "You can do this with the /sync command.", NamedTextColor.RED));
                 }
 
                 // TODO: use permissions
-                if (profile.getRank() == Rank.OWNER) {
+                if (player.hasPermission("*")) {
                     player.setPermissionLevel(4);
                 }
 
@@ -225,9 +221,9 @@ public class ProfileHandler {
             Profile profile = Profile.fromUuid(player.getUuid());
             Component formattedName = profile.getFormattedName();
 
-            event.setChatFormat(chatEvent -> formattedName
+            event.setFormattedMessage(formattedName
                 .append(Component.text(": ", NamedTextColor.GRAY))
-                .append(Component.text(event.getMessage(), NamedTextColor.WHITE)));
+                .append(Component.text(event.getRawMessage(), NamedTextColor.WHITE)));
         });
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             Player player = event.getPlayer();

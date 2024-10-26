@@ -4,10 +4,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.tag.Tag;
@@ -40,7 +37,7 @@ public class NametagEntity extends Entity {
 
         meta.setHeight(HEIGHT);
         meta.setWidth(WIDTH);
-        meta.setPose(Pose.SNIFFING);
+        meta.setPose(EntityPose.SNIFFING);
 
         player.setTag(NAMETAG_TAG, this);
         player.addPassenger(this);

@@ -15,8 +15,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.advancements.FrameType;
-import net.minestom.server.advancements.notifications.Notification;
-import net.minestom.server.advancements.notifications.NotificationCenter;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import reactor.core.publisher.Mono;
@@ -89,14 +87,6 @@ public class DiscordBot {
                 Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(syncProfile.getUuid());
 
                 if (player == null) return;
-
-                Notification newNotification = new Notification(
-                    Component.text("Account Synced"),
-                    FrameType.CHALLENGE,
-                    Material.EMERALD
-                );
-
-                NotificationCenter.send(newNotification, player);
 
                 player.sendMessage(Component.text("Your account has been synced to ", NamedTextColor.GREEN)
                     .append(Component.text(author.getUsername(), NamedTextColor.WHITE))

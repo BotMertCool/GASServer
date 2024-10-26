@@ -32,7 +32,7 @@ public class SimpleCommands {
     private static List<Command> commands() {
         Command stop = new Command("stop");
         stop.setCondition((sender, commandString) -> sender instanceof ConsoleSender ||
-            (sender instanceof Player player && player.getPermissionLevel() == 4));
+            (sender instanceof Player player && player.hasPermission("*")));
         stop.setDefaultExecutor((sender, context) -> {
             ShutdownUtil.stopServer();
         });
@@ -44,68 +44,68 @@ public class SimpleCommands {
         });
 
 
-        Command debug = new Command("debug");
+//        Command debug = new Command("debug");
 
-        debug.setDefaultExecutor((sender, context) -> {
-            Player player = (Player) sender;
+//        debug.setDefaultExecutor((sender, context) -> {
+//            Player player = (Player) sender;
+//
+//            if (player.getPermissionLevel() < 4) {
+//                player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+//                return;
+//            }
+//            Pos pos = player.getPosition();
+//
+//            player.sendMessage(Component.text("""
+//                x: %f
+//                y: %f
+//                z: %f
+//                ya/: %f
+//                pitch: %f
+//                """.formatted(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch())));
+//        });
 
-            if (player.getPermissionLevel() < 4) {
-                player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-            Pos pos = player.getPosition();
-
-            player.sendMessage(Component.text("""
-                x: %f
-                y: %f
-                z: %f
-                ya/: %f
-                pitch: %f
-                """.formatted(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch())));
-        });
-
-        ArgumentString test = ArgumentType.String("test");
-        ArgumentString arg = ArgumentType.String("arg");
-
-        debug.addSyntax((sender, context) -> {
-            Player player = (Player) sender;
-
-            if (player.getPermissionLevel() < 4) {
-                //player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                //return;
-            }
-
-            String testString = context.get(test);
-            String argString = context.get(arg);
-
-            switch (testString.toLowerCase()) {
-                case "rank": {
-                    Profile profile = Profile.fromUuid(player.getUuid());
-                    argString = argString.toUpperCase();
-
-                    Rank rank = Rank.valueOf(argString);
-                    try {
-                        profile.setRank(rank);
-                        player.sendMessage(Component.text("[debug] rank set " + argString +  " -> ", NamedTextColor.LIGHT_PURPLE)
-                            .append(profile.getFormattedName())
-                        );
-                    } catch (IllegalArgumentException e) {
-                        player.sendMessage("[debug] no rank with name: " + argString);
-                    }
-                    break;
-                }
-                case "discordid": {
-                    Profile profile = Profile.fromUuid(player.getUuid());
-                    profile.setDiscordId(argString);
-                    player.sendMessage("[debug] discordid set -> " + argString);
-                    break;
-                }
-                default: {
-                    break;
-                }
-
-            }
-        }, test, arg);
+//        ArgumentString test = ArgumentType.String("test");
+//        ArgumentString arg = ArgumentType.String("arg");
+//
+//        debug.addSyntax((sender, context) -> {
+//            Player player = (Player) sender;
+//
+//            if (player.getPermissionLevel() < 4) {
+//                //player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+//                //return;
+//            }
+//
+//            String testString = context.get(test);
+//            String argString = context.get(arg);
+//
+//            switch (testString.toLowerCase()) {
+//                case "rank": {
+//                    Profile profile = Profile.fromUuid(player.getUuid());
+//                    argString = argString.toUpperCase();
+//
+//                    Rank rank = Rank.valueOf(argString);
+//                    try {
+//                        profile.setRank(rank);
+//                        player.sendMessage(Component.text("[debug] rank set " + argString +  " -> ", NamedTextColor.LIGHT_PURPLE)
+//                            .append(profile.getFormattedName())
+//                        );
+//                    } catch (IllegalArgumentException e) {
+//                        player.sendMessage("[debug] no rank with name: " + argString);
+//                    }
+//                    break;
+//                }
+//                case "discordid": {
+//                    Profile profile = Profile.fromUuid(player.getUuid());
+//                    profile.setDiscordId(argString);
+//                    player.sendMessage("[debug] discordid set -> " + argString);
+//                    break;
+//                }
+//                default: {
+//                    break;
+//                }
+//
+//            }
+//        }, test, arg);
 
         Command metrics = new Command("metrics");
         metrics.setDefaultExecutor((sender, context) -> {
@@ -141,6 +141,6 @@ public class SimpleCommands {
             sender.sendMessage(Component.text("Time set to " + context.get(inputTime), NamedTextColor.GREEN));
         }, inputTime);
 
-        return List.of(stop, ping, debug, metrics, tps, time);
+        return List.of(stop, ping, metrics, tps, time);
     }
 }

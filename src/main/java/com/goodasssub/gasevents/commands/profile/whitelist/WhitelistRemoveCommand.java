@@ -15,6 +15,8 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class WhitelistRemoveCommand extends Command {
+    final String PERMISSION = "core.whitelist";
+
     public WhitelistRemoveCommand() {
         super("remove");
 
@@ -23,7 +25,7 @@ public class WhitelistRemoveCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -44,7 +46,7 @@ public class WhitelistRemoveCommand extends Command {
     private void onPlayerTeleport(CommandSender sender, CommandContext context) {
         final Player player = (Player) sender;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

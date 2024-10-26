@@ -14,6 +14,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.location.RelativeVec;
 
 public class TeleportCommand extends Command {
+    final String PERMISSION = "core.teleport";
+
     public TeleportCommand() {
         super("teleport", "tp");
 
@@ -23,7 +25,7 @@ public class TeleportCommand extends Command {
 
             String commandName = context.getCommandName();
             
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -46,7 +48,7 @@ public class TeleportCommand extends Command {
     private void onPlayerTeleport(CommandSender sender, CommandContext context) {
         final Player player = (Player) sender;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }
@@ -67,7 +69,7 @@ public class TeleportCommand extends Command {
         //TODO: check if instanceof player
         final Player player = (Player) sender;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

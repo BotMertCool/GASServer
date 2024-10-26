@@ -17,6 +17,8 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class MuteCommand extends Command {
+    final String PERMISSION = "core.punish";
+
     public MuteCommand() {
         super("mute");
 
@@ -25,7 +27,7 @@ public class MuteCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -51,7 +53,7 @@ public class MuteCommand extends Command {
         final Player player = (Player) sender;
         final String reasonString = String.join(" ", reason);
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

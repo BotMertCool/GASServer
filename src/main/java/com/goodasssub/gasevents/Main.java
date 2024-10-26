@@ -5,10 +5,7 @@ import com.goodasssub.gasevents.commands.*;
 import com.goodasssub.gasevents.commands.profile.*;
 import com.goodasssub.gasevents.commands.profile.punishments.*;
 import com.goodasssub.gasevents.commands.profile.whitelist.*;
-import com.goodasssub.gasevents.commands.staff.FlyCommand;
-import com.goodasssub.gasevents.commands.staff.TeleportCommand;
-import com.goodasssub.gasevents.commands.staff.GamemodeCommand;
-import com.goodasssub.gasevents.commands.staff.ThruCommand;
+import com.goodasssub.gasevents.commands.staff.*;
 import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
@@ -22,6 +19,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
@@ -81,6 +79,8 @@ public class Main {
         System.setProperty("minestom.chunk-view-distance", configManager.getConfig().getViewDistance());
         System.setProperty("minestom.entity-view-distance", configManager.getConfig().getViewDistance());
 
+
+
         MinecraftServer minecraftServer = MinecraftServer.init();
 
 
@@ -100,6 +100,7 @@ public class Main {
         commandManager.register(new TempMuteCommand());
         commandManager.register(new UnmuteCommand());
         commandManager.register(new KickCommand());
+        commandManager.register(new SetBlockCommand());
 
         SimpleCommands.register(commandManager);
 
@@ -153,7 +154,9 @@ public class Main {
             logger.info("Mojang auth initialized.");
         } else {
 
-            connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUuid(username));
+
+            // FIXME: idk how to set uuid with ConnectionManager#setUuidProvider being removed.
+            //connectionManager.setUuidProvider((playerConnection, username) -> UUIDUtil.getOfflineUuid(username));
 
             logger.info("Mojang auth disabled.");
         }
@@ -168,6 +171,8 @@ public class Main {
             ShutdownUtil.stopServer();
             logger.info("Stopping...");
         });
+
+
 
         minecraftServer.start("0.0.0.0", 25565);
 

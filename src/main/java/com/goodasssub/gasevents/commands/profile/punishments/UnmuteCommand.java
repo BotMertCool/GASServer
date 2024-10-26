@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class UnmuteCommand extends Command {
+    final String PERMISSION = "core.punish";
+
     public UnmuteCommand() {
         super("unmute");
 
@@ -27,7 +29,7 @@ public class UnmuteCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -48,7 +50,7 @@ public class UnmuteCommand extends Command {
     private void execute(CommandSender sender, CommandContext context) {
         if (!(sender instanceof Player player)) return;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

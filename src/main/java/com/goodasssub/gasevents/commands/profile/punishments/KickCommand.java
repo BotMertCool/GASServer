@@ -18,6 +18,8 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class KickCommand extends Command {
+    final String PERMISSION = "core.punish";
+
     public KickCommand() {
         super("kick");
 
@@ -26,7 +28,7 @@ public class KickCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -47,7 +49,7 @@ public class KickCommand extends Command {
     private void execute(CommandSender sender, CommandContext context) {
         final Player player = (Player) sender;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

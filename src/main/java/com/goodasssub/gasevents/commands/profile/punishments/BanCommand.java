@@ -1,7 +1,6 @@
 package com.goodasssub.gasevents.commands.profile.punishments;
 
 import com.goodasssub.gasevents.Main;
-import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.UUIDUtil;
@@ -18,6 +17,8 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class BanCommand extends Command {
+    final String PERMISSION = "core.punish";
+
     public BanCommand() {
         super("ban");
 
@@ -26,7 +27,7 @@ public class BanCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -53,7 +54,7 @@ public class BanCommand extends Command {
         final Player player = (Player) sender;
         final String reasonString = String.join(" ", reason);
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

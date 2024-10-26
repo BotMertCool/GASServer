@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class TempMuteCommand extends Command {
+    final String PERMISSION = "core.punish";
+
     public TempMuteCommand() {
         super("tempmute");
 
@@ -30,7 +32,7 @@ public class TempMuteCommand extends Command {
 
             String commandName = context.getCommandName();
 
-            if (player.getPermissionLevel() < 2) {
+            if (!player.hasPermission(PERMISSION)) {
                 sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
                 return;
             }
@@ -74,7 +76,7 @@ public class TempMuteCommand extends Command {
         final Player player = (Player) sender;
         final String reasonString = String.join(" ", reason);
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }

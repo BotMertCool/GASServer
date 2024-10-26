@@ -11,6 +11,8 @@ import net.minestom.server.entity.Player;
 import java.util.Map;
 
 public class WhitelistListCommand extends Command {
+    final String PERMISSION = "core.whitelist";
+
     public WhitelistListCommand() {
         super("list");
         setDefaultExecutor(this::usage);
@@ -19,7 +21,7 @@ public class WhitelistListCommand extends Command {
     private void usage(CommandSender sender, CommandContext context) {
         if (!(sender instanceof Player player)) return;
 
-        if (player.getPermissionLevel() < 2) {
+        if (!player.hasPermission(PERMISSION)) {
             player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
             return;
         }
