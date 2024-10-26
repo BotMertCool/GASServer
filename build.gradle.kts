@@ -35,7 +35,7 @@ java {
 tasks {
     jar {
         manifest {
-            attributes["Main-Class"] = "com.goodasssub.Main"
+            attributes["Main-Class"] = "com.goodasssub.gasevents.Main"
         }
     }
 

@@ -153,8 +153,10 @@ public class ProfileHandler {
             String joinMessage = """
                 <gray>%s</gray>
                 <gold>Recommended Settings:</gold>
-                <gold>View Distance: </gold><white>24+</white>
-                <gold>Simulation Distance: </gold><white>24+</white>
+                <gold>View Distance: </gold><white>16+</white>
+                <gold>Simulation Distance: </gold><white>16+</white>
+                
+                <gold>Coded By: </gold><white>BotMert</white>
                 <gray>%s</gray>""".formatted(bar, bar);
 
             player.sendMessage(instance.getMiniMessage().deserialize(joinMessage));
