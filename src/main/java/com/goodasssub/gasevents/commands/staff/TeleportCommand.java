@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.commands.staff;
 
+import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -19,21 +20,16 @@ public class TeleportCommand extends Command {
     public TeleportCommand() {
         super("teleport", "tp");
 
-        setCondition(Conditions::playerOnly);
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-            
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player> | <x> <y> <z>", NamedTextColor.RED));
         });
 
         var posArg = ArgumentType.RelativeVec3("pos");
+
+        //TODO: entity finder?
         var playerArg = ArgumentType.String("player")
             .setSuggestionCallback((sender, context, suggestion) -> {
                 for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
@@ -41,17 +37,13 @@ public class TeleportCommand extends Command {
                 }
             });
 
-        addSyntax(this::onPlayerTeleport, playerArg);
-        addSyntax(this::onPositionTeleport, posArg);
+        addSyntax(this::executePlayer, playerArg);
+        addSyntax(this::executePosition, posArg);
     }
 
-    private void onPlayerTeleport(CommandSender sender, CommandContext context) {
+    private void executePlayer(CommandSender sender, CommandContext context) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
         final Player player = (Player) sender;
-
-        if (!player.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
 
         final String playerName = context.get("player");
 
@@ -65,14 +57,9 @@ public class TeleportCommand extends Command {
         sender.sendMessage(Component.text("Teleported to player " + playerName));
     }
 
-    private void onPositionTeleport(CommandSender sender, CommandContext context) {
-        //TODO: check if instanceof player
+    private void executePosition(CommandSender sender, CommandContext context) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
         final Player player = (Player) sender;
-
-        if (!player.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
 
         final RelativeVec relativeVec = context.get("pos");
         final Pos position = player.getPosition().withCoord(relativeVec.from(player));

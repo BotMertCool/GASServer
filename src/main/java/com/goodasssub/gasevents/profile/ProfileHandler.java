@@ -25,6 +25,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
+import net.minestom.server.permission.Permission;
 import net.minestom.server.utils.time.TimeUnit;
 import org.bson.Document;
 import org.w3c.dom.Text;
@@ -76,14 +77,17 @@ public class ProfileHandler {
 
         eventNode.addListener(PlayerBlockBreakEvent.class, event -> {
             //TODO: move to prevention.
+            if (event.getPlayer().hasPermission("*")) return;
             event.setCancelled(true);
         });
         eventNode.addListener(PlayerBlockPlaceEvent.class, event -> {
             //TODO: move to prevention.
+            if (event.getPlayer().hasPermission("*")) return;
             event.setCancelled(true);
         });
         eventNode.addListener(PlayerSwapItemEvent.class, event -> {
             //TODO: move to prevention.
+            if (event.getPlayer().hasPermission("*")) return;
             event.setCancelled(true);
         });
 
@@ -98,6 +102,8 @@ public class ProfileHandler {
 
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
+
+            Main.getInstance().getLogger().info("new login: {}", player.getPlayerConnection().getProtocolVersion());
 
             if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
                 player.kick(Component.text("You are not whitelisted."));
@@ -127,6 +133,8 @@ public class ProfileHandler {
             player.setRespawnPoint(pos);
         });
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
+            Main.getInstance().getLogger().info("new login: {}", event.getPlayer().getUsername());
+
             final Player player = event.getPlayer();
 
             VisibilityItem.getPlayerVisibilityMap().forEach((uuid, bool) -> {
@@ -156,6 +164,7 @@ public class ProfileHandler {
 
                 boolean save = false;
 
+                // hash this?
                 if (profile.getIpAddress() == null) {
                     InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
                     profile.setIpAddress(address.getHostName());
@@ -168,7 +177,8 @@ public class ProfileHandler {
                     save = true;
                 }
 
-                Component playerName = instance.getMiniMessage().deserialize(String.format("<%s>", profile.getRank().getColor()))
+                Component playerName = instance.getMiniMessage()
+                    .deserialize(String.format("<%s>", profile.getRank().getColor()))
                     .append(Component.text(player.getUsername()));
 
                 player.setDisplayName(playerName);
@@ -183,7 +193,14 @@ public class ProfileHandler {
 //                        "You can do this with the /sync command.", NamedTextColor.RED));
                 }
 
-                // TODO: use permissions
+                // ranks inherit?
+                List<Permission> permissions = profile.getRank().getPermissions()
+                    .stream()
+                    .map(Permission::new)
+                    .toList();
+
+                permissions.forEach(player::addPermission);
+
                 if (player.hasPermission("*")) {
                     player.setPermissionLevel(4);
                 }
@@ -221,9 +238,14 @@ public class ProfileHandler {
             Profile profile = Profile.fromUuid(player.getUuid());
             Component formattedName = profile.getFormattedName();
 
-            event.setFormattedMessage(formattedName
+            event.setChatFormat(chatEvent -> formattedName
                 .append(Component.text(": ", NamedTextColor.GRAY))
-                .append(Component.text(event.getRawMessage(), NamedTextColor.WHITE)));
+                .append(Component.text(event.getMessage(), NamedTextColor.WHITE)));
+
+//          1.12.2+
+//            event.setFormattedMessage(formattedName
+//                .append(Component.text(": ", NamedTextColor.GRAY))
+//                .append(Component.text(event.getRawMessage(), NamedTextColor.WHITE)));
         });
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             Player player = event.getPlayer();

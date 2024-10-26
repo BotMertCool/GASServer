@@ -3,6 +3,7 @@ package com.goodasssub.gasevents.commands.profile.punishments;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
+import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.TimeUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
@@ -28,14 +29,9 @@ public class TempMuteCommand extends Command {
         super("tempmute");
 
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
 
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player> <duration> [reason]", NamedTextColor.RED));
         });
@@ -73,13 +69,9 @@ public class TempMuteCommand extends Command {
     }
 
     private void execute(CommandSender sender, CommandContext context, String[] reason) {
-        final Player player = (Player) sender;
-        final String reasonString = String.join(" ", reason);
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
-        if (!player.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
+        final String reasonString = String.join(" ", reason);
 
         final String playerName = context.get("player");
         final long duration = TimeUtil.convertToTimeInMillis(context.get("duration"));
@@ -90,7 +82,7 @@ public class TempMuteCommand extends Command {
             return;
         }
 
-        if (player.getUuid().equals(uuid)) {
+        if (sender instanceof Player player && player.getUuid().equals(uuid)) {
             sender.sendMessage(Component.text("You cant mute yourself!", NamedTextColor.RED));
             return;
         }
@@ -100,9 +92,10 @@ public class TempMuteCommand extends Command {
             return;
         }
 
+        UUID executorUuid = sender instanceof Player player ? player.getUuid() : Punishment.SYSTEM_UUID;
         Punishment punishment = new Punishment(
             PunishmentType.MUTE,
-            player.getUuid(),
+            executorUuid,
             uuid,
             reasonString,
             duration

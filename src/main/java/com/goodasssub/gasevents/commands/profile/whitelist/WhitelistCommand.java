@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.commands.profile.whitelist;
 
+import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
@@ -19,16 +20,11 @@ public class WhitelistCommand extends Command {
         addSubcommand(new WhitelistAddCommand());
         addSubcommand(new WhitelistRemoveCommand());
 
-        setDefaultExecutor(this::usage);
+        setDefaultExecutor(this::execute);
     }
 
-    private void usage(CommandSender sender, CommandContext context) {
-        if (!(sender instanceof Player player)) return;
-
-        if (!player.hasPermission(PERMISSION)) {
-            player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
+    private void execute(CommandSender sender, CommandContext context) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
         StringBuilder stringBuilder = new StringBuilder();
 

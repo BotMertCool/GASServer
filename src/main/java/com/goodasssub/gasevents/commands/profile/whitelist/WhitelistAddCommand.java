@@ -2,6 +2,7 @@ package com.goodasssub.gasevents.commands.profile.whitelist;
 
 import com.fasterxml.jackson.databind.util.Named;
 import com.goodasssub.gasevents.Main;
+import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,14 +23,8 @@ public class WhitelistAddCommand extends Command {
         super("add");
 
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
-
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
             String commandName = context.getCommandName();
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
 
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player>", NamedTextColor.RED));
         });
@@ -41,16 +36,11 @@ public class WhitelistAddCommand extends Command {
                 }
             });
 
-        addSyntax(this::onPlayerTeleport, playerArg);
+        addSyntax(this::execute, playerArg);
     }
 
-    private void onPlayerTeleport(CommandSender sender, CommandContext context) {
-        final Player player = (Player) sender;
-
-        if (!player.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
+    private void execute(CommandSender sender, CommandContext context) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
         final String playerName = context.get("player");
 

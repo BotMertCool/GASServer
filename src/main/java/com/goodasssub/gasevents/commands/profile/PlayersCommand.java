@@ -19,10 +19,10 @@ import java.util.concurrent.CompletableFuture;
 public class PlayersCommand extends Command {
     public PlayersCommand() {
         super("players", "list");
-        setDefaultExecutor(this::usage);
+        setDefaultExecutor(this::execute);
     }
 
-    private void usage(CommandSender sender, CommandContext context) {
+    private void execute(CommandSender sender, CommandContext context) {
         CompletableFuture.runAsync(() -> {
             final Collection<Player> players = MinecraftServer.getConnectionManager().getOnlinePlayers();
             final List<Rank> ranks = Rank.sortedByWeight();

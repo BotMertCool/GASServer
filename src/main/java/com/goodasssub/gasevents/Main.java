@@ -34,9 +34,9 @@ import net.minestom.server.monitoring.TickMonitor;
 import net.minestom.server.ping.ResponseData;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.identity.NamedAndIdentified;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +61,8 @@ public class Main {
     @Getter private final MiniMessage miniMessage;
 
     // TODO: Figure out how to do unit tests.
-
     // TODO: maybe take in args in constructor.
+
     public Main() {
         long startTime = System.currentTimeMillis();
 
@@ -80,11 +80,13 @@ public class Main {
         System.setProperty("minestom.entity-view-distance", configManager.getConfig().getViewDistance());
 
 
-
+        MinecraftServer.setCompressionThreshold(0);
         MinecraftServer minecraftServer = MinecraftServer.init();
 
 
+
         CommandManager commandManager = MinecraftServer.getCommandManager();
+
         commandManager.register(new GamemodeCommand());
         commandManager.register(new PlayersCommand());
         commandManager.register(new SyncCommand());
@@ -110,7 +112,7 @@ public class Main {
 
         DynamicRegistry<DimensionType> registry = MinecraftServer.getDimensionTypeRegistry();
         DimensionType fullBright = DimensionType.builder()
-            .ambientLight(0.3f)
+            .ambientLight(0.15f)
             .build();
         registry.register(NamespaceID.from("minestorm:custom"), fullBright);
 
@@ -127,6 +129,8 @@ public class Main {
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
         var connectionManager = MinecraftServer.getConnectionManager();
+
+        // FIXME: doesnt kick player if wrong version
 
         eventHandler.addListener(ServerListPingEvent.class, event -> {
             // TODO: add to config, desc, server name, etc
@@ -171,8 +175,6 @@ public class Main {
             ShutdownUtil.stopServer();
             logger.info("Stopping...");
         });
-
-
 
         minecraftServer.start("0.0.0.0", 25565);
 

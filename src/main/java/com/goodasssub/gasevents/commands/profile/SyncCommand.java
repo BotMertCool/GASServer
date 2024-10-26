@@ -16,10 +16,10 @@ import java.util.concurrent.CompletableFuture;
 public class SyncCommand extends Command {
     public SyncCommand() {
         super("sync");
-        setDefaultExecutor(this::usage);
+        setDefaultExecutor(this::execute);
     }
 
-    private void usage(CommandSender sender, CommandContext context) {
+    private void execute(CommandSender sender, CommandContext context) {
         CompletableFuture.runAsync(() -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("Please run this command in-game.", NamedTextColor.RED));

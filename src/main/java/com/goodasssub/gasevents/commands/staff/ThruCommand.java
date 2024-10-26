@@ -13,16 +13,12 @@ public class ThruCommand extends Command {
 
     public ThruCommand() {
         super("thru", "through");
-        setDefaultExecutor(this::usage);
+        setDefaultExecutor(this::execute);
     }
 
-    private void usage(CommandSender sender, CommandContext context) {
-        if (!(sender instanceof Player player)) return;
+    private void execute(CommandSender sender, CommandContext context) {
 
-        if (!player.hasPermission(PERMISSION)) {
-            player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
+        if (!(sender instanceof Player player)) return;
 
         if (!PlayerUtil.passThroughForwardWall(player, 6)) {
             sender.sendMessage(Component.text("No free spot ahead of you found.", NamedTextColor.RED));

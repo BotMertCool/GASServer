@@ -3,6 +3,7 @@ package com.goodasssub.gasevents.commands;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.rank.Rank;
+import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.TPSUtil;
 import net.kyori.adventure.text.Component;
@@ -31,8 +32,7 @@ public class SimpleCommands {
 
     private static List<Command> commands() {
         Command stop = new Command("stop");
-        stop.setCondition((sender, commandString) -> sender instanceof ConsoleSender ||
-            (sender instanceof Player player && player.hasPermission("*")));
+        stop.setCondition((sender, commandString) -> PlayerUtil.hasPermission(sender, "*"));
         stop.setDefaultExecutor((sender, context) -> {
             ShutdownUtil.stopServer();
         });
@@ -129,8 +129,7 @@ public class SimpleCommands {
         Command time = new Command("time");
         ArgumentInteger inputTime = ArgumentType.Integer("time");
 
-        time.setCondition((sender, commandString) -> sender instanceof ConsoleSender ||
-            (sender instanceof Player player && player.getPermissionLevel() == 4));
+        time.setCondition((sender, commandString) -> PlayerUtil.hasPermission(sender, "core.time"));
 
         time.setDefaultExecutor((sender, context) ->
             sender.sendMessage(Component.text("Usage: /" +  context.getCommandName() + " <time>", NamedTextColor.RED)));

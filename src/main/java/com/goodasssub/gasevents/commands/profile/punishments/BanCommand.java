@@ -3,6 +3,7 @@ package com.goodasssub.gasevents.commands.profile.punishments;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
+import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,15 +24,9 @@ public class BanCommand extends Command {
         super("ban");
 
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             sender.sendMessage(Component.text("Usage: /" + commandName + " <player> [reason]", NamedTextColor.RED));
         });
 
@@ -51,13 +46,10 @@ public class BanCommand extends Command {
     }
 
     private void execute(CommandSender sender, CommandContext context, String[] reason) {
-        final Player player = (Player) sender;
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
+
         final String reasonString = String.join(" ", reason);
 
-        if (!player.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
 
         final String playerName = context.get("player");
 
@@ -67,7 +59,7 @@ public class BanCommand extends Command {
             return;
         }
 
-        if (player.getUuid().equals(uuid)) {
+        if (sender instanceof Player player && player.getUuid().equals(uuid)) {
             sender.sendMessage(Component.text("You cant ban yourself!", NamedTextColor.RED));
             return;
         }
@@ -77,9 +69,10 @@ public class BanCommand extends Command {
             return;
         }
 
+        UUID executorUuid = sender instanceof Player player ? player.getUuid() : Punishment.SYSTEM_UUID;
         Punishment punishment = new Punishment(
             PunishmentType.BAN,
-            player.getUuid(),
+            executorUuid,
             uuid,
             reasonString,
             Punishment.PERMANENT

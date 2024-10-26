@@ -37,7 +37,9 @@ public class NametagEntity extends Entity {
 
         meta.setHeight(HEIGHT);
         meta.setWidth(WIDTH);
-        meta.setPose(EntityPose.SNIFFING);
+
+        // EntityPose on latest
+        meta.setPose(Pose.SNIFFING);
 
         player.setTag(NAMETAG_TAG, this);
         player.addPassenger(this);

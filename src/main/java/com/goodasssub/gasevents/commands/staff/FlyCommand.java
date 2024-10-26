@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.commands.staff;
 
+import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
@@ -16,12 +17,8 @@ public class FlyCommand extends Command {
     }
 
     private void usage(CommandSender sender, CommandContext context) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
         if (!(sender instanceof Player player)) return;
-
-        if (!player.hasPermission(PERMISSION)) {
-            player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-            return;
-        }
 
         player.setAllowFlying(!player.isAllowFlying());
 

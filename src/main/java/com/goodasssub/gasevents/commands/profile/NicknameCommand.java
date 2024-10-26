@@ -3,6 +3,7 @@ package com.goodasssub.gasevents.commands.profile;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.entities.NametagEntity;
+import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
@@ -21,28 +22,19 @@ public class NicknameCommand extends Command {
     public NicknameCommand() {
         super("setnick", "nick", "nickname");
 
-        ArgumentStringArray nickname = ArgumentType.StringArray("nickname");
-
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             sender.sendMessage(Component.text("Usage: /" + commandName + " <nickname>", NamedTextColor.RED));
         });
 
-        addSyntax((sender, context) -> {
-            Player player = (Player) sender;
+        ArgumentStringArray nickname = ArgumentType.StringArray("nickname");
 
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
+        addSyntax((sender, context) -> {
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
+
+            Player player = (Player) sender;
 
             Profile profile = Profile.fromUuid(player.getUuid());
 

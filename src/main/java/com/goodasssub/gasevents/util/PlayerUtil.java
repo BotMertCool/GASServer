@@ -2,12 +2,16 @@ package com.goodasssub.gasevents.util;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.permission.Permission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,15 @@ public class PlayerUtil {
         }
 
         return onlineStaff;
+    }
+
+    public static boolean hasPermission(CommandSender sender, String permission) {
+        if (sender instanceof Player player && !player.hasPermission(new Permission(permission))) {
+            player.sendMessage(Component.text("No permission", NamedTextColor.RED));
+            return false;
+        }
+
+        return true;
     }
 
     // https://github.com/EngineHub/WorldEdit/

@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.commands.staff;
 
+import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
@@ -31,40 +32,19 @@ public class GamemodeCommand extends Command {
         ArgumentEntity target = ArgumentType.Entity("targets").onlyPlayers(true);
 
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof Player player)) return;
+            if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
 
             String commandName = context.getCommandName();
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             sender.sendMessage(Component.text("Usage: /" + commandName + " <gamemode> [targets]", NamedTextColor.RED));
         });
 
         addSyntax((sender, context) -> {
-            if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("Please run this command in-game.", NamedTextColor.RED));
-                return;
-            }
-
-            if (!player.hasPermission(PERMISSION)) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             GameMode mode = context.get(gamemode);
 
-            executeSelf(player, mode);
+            executeSelf((Player) sender, mode);
         }, gamemode);
         
         addSyntax((sender, context) -> {
-            if (sender instanceof Player player && player.getPermissionLevel() < 2) {
-                sender.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-                return;
-            }
-
             EntityFinder finder = context.get(target);
             GameMode mode = context.get(gamemode);
 
@@ -73,6 +53,8 @@ public class GamemodeCommand extends Command {
     }
 
     private void executeOthers(CommandSender sender, GameMode mode, List<Entity> entities) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
+
         if (entities.isEmpty()) {
             sender.sendMessage(Component.text("No player was found.", NamedTextColor.RED));
             return;
@@ -101,8 +83,9 @@ public class GamemodeCommand extends Command {
             sender.sendMessage(senderComponent);
         }
     }
-    
+
     private void executeSelf(Player sender, GameMode mode) {
+        if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
         sender.setGameMode(mode);
 
         String gamemode = mode.name().toUpperCase();
