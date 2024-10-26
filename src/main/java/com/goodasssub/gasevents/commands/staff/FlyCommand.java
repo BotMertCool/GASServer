@@ -9,7 +9,7 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
 
 public class FlyCommand extends Command {
-    final String PERMISSION = "core.fly";
+    private final String PERMISSION = "core.fly";
 
     public FlyCommand() {
         super("fly");

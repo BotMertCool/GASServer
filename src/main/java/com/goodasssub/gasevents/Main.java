@@ -104,6 +104,7 @@ public class Main {
         commandManager.register(new KickCommand());
         commandManager.register(new SetBlockCommand());
         commandManager.register(new SummonCommand());
+        commandManager.register(new FillCommand());
 
         SimpleCommands.register(commandManager);
 

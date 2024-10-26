@@ -9,7 +9,7 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
 
 public class ThruCommand extends Command {
-    final String PERMISSION = "core.thru";
+    private final String PERMISSION = "core.thru";
 
     public ThruCommand() {
         super("thru", "through");

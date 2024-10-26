@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class UnmuteCommand extends Command {
-    final String PERMISSION = "core.punish";
+    private final String PERMISSION = "core.punish";
 
     public UnmuteCommand() {
         super("unmute");

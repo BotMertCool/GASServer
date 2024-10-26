@@ -9,7 +9,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.location.RelativeVec;
 
 public class SetBlockCommand extends Command {
-    final String PERMISSION = "core.setblock";
+    private final String PERMISSION = "core.setblock";
 
     public enum SetBlockMode {
         DESTROY,

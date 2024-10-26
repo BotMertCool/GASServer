@@ -19,7 +19,7 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class KickCommand extends Command {
-    final String PERMISSION = "core.punish";
+    private final String PERMISSION = "core.punish";
 
     public KickCommand() {
         super("kick");

@@ -15,7 +15,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.location.RelativeVec;
 
 public class TeleportCommand extends Command {
-    final String PERMISSION = "core.teleport";
+    private final String PERMISSION = "core.teleport";
 
     public TeleportCommand() {
         super("teleport", "tp");

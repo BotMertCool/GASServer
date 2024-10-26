@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 // taken from github.com/minestom/minestom -> demo/commands
 public class SummonCommand extends Command {
-    final String PERMISSION = "core.summon";
+    private final String PERMISSION = "core.summon";
 
     private final ArgumentEntityType entity;
     private final Argument<RelativeVec> pos;

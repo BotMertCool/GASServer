@@ -16,7 +16,7 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class WhitelistRemoveCommand extends Command {
-    final String PERMISSION = "core.whitelist";
+    private final String PERMISSION = "core.whitelist";
 
     public WhitelistRemoveCommand() {
         super("remove");

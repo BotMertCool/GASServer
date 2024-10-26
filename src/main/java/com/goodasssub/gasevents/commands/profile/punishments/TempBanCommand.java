@@ -22,7 +22,7 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class TempBanCommand extends Command {
-    final String PERMISSION = "core.punish";
+    private final String PERMISSION = "core.punish";
 
     public TempBanCommand() {
         super("tempban");

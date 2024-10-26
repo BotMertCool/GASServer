@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class TempMuteCommand extends Command {
-    final String PERMISSION = "core.punish";
+    private final String PERMISSION = "core.punish";
 
     public TempMuteCommand() {
         super("tempmute");

@@ -17,7 +17,7 @@ import net.minestom.server.entity.Player;
 import java.util.UUID;
 
 public class WhitelistAddCommand extends Command {
-    final String PERMISSION = "core.whitelist";
+    private final String PERMISSION = "core.whitelist";
 
     public WhitelistAddCommand() {
         super("add");

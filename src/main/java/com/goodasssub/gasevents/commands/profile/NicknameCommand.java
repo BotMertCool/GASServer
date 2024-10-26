@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 public class NicknameCommand extends Command {
-    final String PERMISSION = "core.nickname";
+    private final String PERMISSION = "core.nickname";
 
     public static HashSet<UUID> nickedPlayer = new HashSet<>();
 

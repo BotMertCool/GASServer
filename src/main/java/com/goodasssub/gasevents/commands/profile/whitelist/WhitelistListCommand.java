@@ -12,7 +12,7 @@ import net.minestom.server.entity.Player;
 import java.util.Map;
 
 public class WhitelistListCommand extends Command {
-    final String PERMISSION = "core.whitelist";
+    private final String PERMISSION = "core.whitelist";
 
     public WhitelistListCommand() {
         super("list");

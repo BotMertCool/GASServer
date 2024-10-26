@@ -16,7 +16,7 @@ import net.minestom.server.utils.entity.EntityFinder;
 import java.util.List;
 
 public class GamemodeCommand extends Command {
-    final String PERMISSION = "core.gamemode";
+    private final String PERMISSION = "core.gamemode";
 
     public GamemodeCommand() {
         super("gamemode", "gm");

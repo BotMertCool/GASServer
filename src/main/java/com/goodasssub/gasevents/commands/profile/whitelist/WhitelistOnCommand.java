@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 
 public class WhitelistOnCommand extends Command {
-    final String PERMISSION = "core.whitelist";
+    private final String PERMISSION = "core.whitelist";
 
     public WhitelistOnCommand() {
         super("on");
