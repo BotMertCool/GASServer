@@ -65,10 +65,12 @@ public class SetSpawnCommand extends Command {
                 Main.getInstance().getConfigManager().getConfig().setNormalSpawnZ(pos.z());
 
                 for (Player player : players) {
-                    if (player.hasPermission("core.staff")) return;
+                    if (player.hasPermission("core.staff")) continue;
 
                     player.setRespawnPoint(pos);
                 }
+
+                Main.getInstance().getConfigManager().saveConfig();
             }
 
             if (type.equals("staff")) {
@@ -77,7 +79,7 @@ public class SetSpawnCommand extends Command {
                 Main.getInstance().getConfigManager().getConfig().setStaffSpawnZ(pos.z());
 
                 for (Player player : players) {
-                    if (!player.hasPermission("core.staff")) return;
+                    if (!player.hasPermission("core.staff")) continue;
 
                     player.setRespawnPoint(pos);
                 }

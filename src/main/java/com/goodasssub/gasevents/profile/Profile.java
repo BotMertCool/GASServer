@@ -10,6 +10,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.bson.Document;
 
 import java.net.InetSocketAddress;
@@ -162,6 +163,17 @@ public class Profile {
                 .append(Component.text(player.getUsername()));
 
             player.setDisplayName(playerName);
+
+            List<Permission> permissions = this.getRank().getPermissions()
+                .stream()
+                .map(Permission::new)
+                .toList();
+            
+            for (Permission perm : player.getAllPermissions()) {
+                player.removePermission(perm);
+            }
+
+            permissions.forEach(player::addPermission);
         }
 
         this.save();

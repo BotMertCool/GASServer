@@ -1,11 +1,8 @@
 package com.goodasssub.gasevents.anticheat;
 
-import com.fasterxml.jackson.databind.util.Named;
-import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.PlayerUtil;
-import discord4j.core.object.entity.channel.TextChannel;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,12 +19,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AntiCheat {
     private static final int MAX_PING = 1000;
-    private static final int MAX_FLAGS_BEFORE_KICK = 25;
+    private static final int MAX_FLAGS_BEFORE_BAN = 100;
 
     private final Map<UUID, List<String>> newFlaggedPlayers = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> playerFlagCount = new ConcurrentHashMap<>();
@@ -44,7 +40,7 @@ public class AntiCheat {
 
             int currentFlags = playerFlagCount.merge(player.getUuid(), 1, Integer::sum);
 
-            if (currentFlags >= MAX_FLAGS_BEFORE_KICK) {
+            if (currentFlags >= MAX_FLAGS_BEFORE_BAN) {
                 Punishment punishment = new Punishment(
                     PunishmentType.BAN,
                     Punishment.ANTICHEAT_UUID,
@@ -59,7 +55,11 @@ public class AntiCheat {
                 return;
             }
 
-            newFlaggedPlayers.computeIfAbsent(player.getUuid(), i -> new ArrayList<>()).add(event.checkName());
+            int flags = playerFlagCount.get(player.getUuid());
+
+            if (flags % 9 == 0) {
+                newFlaggedPlayers.computeIfAbsent(player.getUuid(), i -> new ArrayList<>()).add(event.checkName());
+            }
         });
 
         var disabledChecks = List.of(
@@ -88,15 +88,13 @@ public class AntiCheat {
 
             if (player == null) return;
 
-            int flags = playerFlagCount.get(entry.getKey());
             for (int i = 0; i < entry.getValue().size(); i++) {
                 String string = entry.getValue().get(i);
 
                 Component alert = formatAlertMessage(
                     player.getUsername(),
                     string,
-                    player.getLatency(),
-                    flags
+                    player.getLatency()
                 );
 
                 alertBatch.append(alert).appendNewline();
@@ -108,12 +106,11 @@ public class AntiCheat {
         }
     }
 
-    private Component formatAlertMessage(String playerName, String cheatType, int ping, int flags) {
+    private Component formatAlertMessage(String playerName, String cheatType, int ping) {
         return Component.text("[AC] ", NamedTextColor.GOLD)
             .append(Component.text(playerName, NamedTextColor.RED))
             .append(Component.text(" has flagged check ", NamedTextColor.GOLD))
             .append(Component.text(cheatType, NamedTextColor.RED))
-            .append(Component.text(" [%s]".formatted(flags), NamedTextColor.RED))
             .append(Component.text(" [%sms]".formatted(ping), NamedTextColor.GRAY));
     }
 }
