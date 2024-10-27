@@ -2,9 +2,10 @@ package com.goodasssub.gasevents.commands.profile;
 
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
-import com.goodasssub.gasevents.rank.Rank;
+import com.goodasssub.gasevents.profile.Rank;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -27,6 +28,7 @@ public class PlayersCommand extends Command {
             final Collection<Player> players = MinecraftServer.getConnectionManager().getOnlinePlayers();
             final List<Rank> ranks = Rank.sortedByWeight();
 
+            // Get Ranks
             StringBuilder stringBuilder = new StringBuilder("(%s/%s): ".formatted(
                 players.size(),
                 Main.getInstance().getConfigManager().getConfig().getMaxPlayers())
@@ -42,9 +44,9 @@ public class PlayersCommand extends Command {
                 if (i == Rank.values().length - 1) continue;
                 stringBuilder.append(", ");
             }
-
             stringBuilder.append("\n");
 
+            // Get Players
             List<Component> playerNames = players.stream()
                 .sorted(Comparator.comparingInt((Player player) ->
                     Profile.fromUuid(player.getUuid()).getRank().getWeight()).reversed()
@@ -66,7 +68,7 @@ public class PlayersCommand extends Command {
 
                 builder.append(playerNames.get(i)).append();
                 if (i == players.size() - 1) continue;
-                builder.append(Main.getInstance().getMiniMessage().deserialize("<gray>, </gray>"));
+                builder.append(Component.text(", ", NamedTextColor.GRAY));
             }
 
             sender.sendMessage(builder.build());

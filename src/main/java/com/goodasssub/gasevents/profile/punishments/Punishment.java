@@ -221,7 +221,6 @@ public class Punishment {
             }
         }
 
-
         broadcastMsg.append(Component.text(".", NamedTextColor.WHITE));
         if (!silent) {
             Audiences.players().sendMessage(broadcastMsg);

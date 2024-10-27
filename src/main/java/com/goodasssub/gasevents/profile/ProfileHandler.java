@@ -8,7 +8,6 @@ import com.goodasssub.gasevents.entities.NametagEntity;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.profile.whitelist.WhitelistHandler;
-import com.goodasssub.gasevents.rank.Rank;
 import com.google.gson.JsonSyntaxException;
 import com.mongodb.client.MongoCursor;
 import net.kyori.adventure.text.Component;
@@ -28,7 +27,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.permission.Permission;
 import net.minestom.server.utils.time.TimeUnit;
 import org.bson.Document;
-import org.w3c.dom.Text;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -64,12 +62,15 @@ public class ProfileHandler {
             if (players.isEmpty())
                 return;
 
-            Main.getInstance().getAntiCheat().sendFlaggedAlerts();
-            Profile.getCache().entrySet().removeIf(entry -> entry.getValue().getPlayer() == null);
             Audiences.players().sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
 
+            CompletableFuture.runAsync(() -> {
+                Profile.getCache().entrySet().removeIf(entry -> entry.getValue().getPlayer() == null);
+                Main.getInstance().getAntiCheat().sendFlaggedAlerts();
+            });
+
             sidebar.update(players.size());
-        }).repeat(10, TimeUnit.SERVER_TICK).schedule();
+        }).repeat(20, TimeUnit.SERVER_TICK).schedule();
     }
 
     public EventNode<?> getEventNode(Instance spawnInstance) {
@@ -103,8 +104,6 @@ public class ProfileHandler {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
-            Main.getInstance().getLogger().info("new login: {}", player.getPlayerConnection().getProtocolVersion());
-
             if (this.whitelistEnabled() && !isPlayerWhitelisted(player.getUuid())) {
                 player.kick(Component.text("You are not whitelisted."));
                 return;
@@ -133,8 +132,6 @@ public class ProfileHandler {
             player.setRespawnPoint(pos);
         });
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
-            Main.getInstance().getLogger().info("new login: {}", event.getPlayer().getUsername());
-
             final Player player = event.getPlayer();
 
             VisibilityItem.getPlayerVisibilityMap().forEach((uuid, bool) -> {

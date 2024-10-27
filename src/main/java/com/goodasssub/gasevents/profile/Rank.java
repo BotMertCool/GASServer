@@ -1,4 +1,4 @@
-package com.goodasssub.gasevents.rank;
+package com.goodasssub.gasevents.profile;
 
 import lombok.Getter;
 
@@ -57,7 +57,7 @@ public enum Rank {
     private final boolean staff;
     private final int weight;
     private final String prefix;
-    private List<String> permissions;
+    private final List<String> permissions;
 
     Rank(String name, String roleId, String color, Boolean staff, int weight, String prefix, List<String> permissions) {
         this.name = name;

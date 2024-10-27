@@ -1,8 +1,6 @@
 package com.goodasssub.gasevents.commands;
 
 import com.goodasssub.gasevents.Main;
-import com.goodasssub.gasevents.profile.Profile;
-import com.goodasssub.gasevents.rank.Rank;
 import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.TPSUtil;
@@ -10,12 +8,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.builder.Command;
-import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.monitoring.BenchmarkManager;

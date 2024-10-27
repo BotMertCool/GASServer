@@ -88,7 +88,7 @@ public class Main {
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
         commandManager.register(new GamemodeCommand());
-        //commandManager.register(new PlayersCommand());
+        commandManager.register(new PlayersCommand());
         commandManager.register(new SyncCommand());
         commandManager.register(new NicknameCommand());
         commandManager.register(new TeleportCommand());
