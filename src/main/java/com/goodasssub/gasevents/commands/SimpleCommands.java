@@ -1,6 +1,8 @@
 package com.goodasssub.gasevents.commands;
 
 import com.goodasssub.gasevents.Main;
+import com.goodasssub.gasevents.profile.Profile;
+import com.goodasssub.gasevents.profile.Rank;
 import com.goodasssub.gasevents.util.PlayerUtil;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.TPSUtil;
@@ -9,8 +11,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.monitoring.BenchmarkManager;
@@ -39,68 +43,68 @@ public class SimpleCommands {
         });
 
 
-//        Command debug = new Command("debug");
+        Command debug = new Command("debug");
 
-//        debug.setDefaultExecutor((sender, context) -> {
-//            Player player = (Player) sender;
-//
-//            if (player.getPermissionLevel() < 4) {
-//                player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-//                return;
-//            }
-//            Pos pos = player.getPosition();
-//
-//            player.sendMessage(Component.text("""
-//                x: %f
-//                y: %f
-//                z: %f
-//                ya/: %f
-//                pitch: %f
-//                """.formatted(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch())));
-//        });
+        debug.setDefaultExecutor((sender, context) -> {
+            Player player = (Player) sender;
 
-//        ArgumentString test = ArgumentType.String("test");
-//        ArgumentString arg = ArgumentType.String("arg");
-//
-//        debug.addSyntax((sender, context) -> {
-//            Player player = (Player) sender;
-//
-//            if (player.getPermissionLevel() < 4) {
-//                //player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
-//                //return;
-//            }
-//
-//            String testString = context.get(test);
-//            String argString = context.get(arg);
-//
-//            switch (testString.toLowerCase()) {
-//                case "rank": {
-//                    Profile profile = Profile.fromUuid(player.getUuid());
-//                    argString = argString.toUpperCase();
-//
-//                    Rank rank = Rank.valueOf(argString);
-//                    try {
-//                        profile.setRank(rank);
-//                        player.sendMessage(Component.text("[debug] rank set " + argString +  " -> ", NamedTextColor.LIGHT_PURPLE)
-//                            .append(profile.getFormattedName())
-//                        );
-//                    } catch (IllegalArgumentException e) {
-//                        player.sendMessage("[debug] no rank with name: " + argString);
-//                    }
-//                    break;
-//                }
-//                case "discordid": {
-//                    Profile profile = Profile.fromUuid(player.getUuid());
-//                    profile.setDiscordId(argString);
-//                    player.sendMessage("[debug] discordid set -> " + argString);
-//                    break;
-//                }
-//                default: {
-//                    break;
-//                }
-//
-//            }
-//        }, test, arg);
+            if (player.getPermissionLevel() < 4) {
+                player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                return;
+            }
+            Pos pos = player.getPosition();
+
+            player.sendMessage(Component.text("""
+                x: %f
+                y: %f
+                z: %f
+                ya/: %f
+                pitch: %f
+                """.formatted(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch())));
+        });
+
+        ArgumentString test = ArgumentType.String("test");
+        ArgumentString arg = ArgumentType.String("arg");
+
+        debug.addSyntax((sender, context) -> {
+            Player player = (Player) sender;
+
+            if (player.getPermissionLevel() < 4) {
+                //player.sendMessage(Component.text("No permission.", NamedTextColor.RED));
+                //return;
+            }
+
+            String testString = context.get(test);
+            String argString = context.get(arg);
+
+            switch (testString.toLowerCase()) {
+                case "rank": {
+                    Profile profile = Profile.fromUuid(player.getUuid());
+                    argString = argString.toUpperCase();
+
+                    Rank rank = Rank.valueOf(argString);
+                    try {
+                        profile.setRank(rank);
+                        player.sendMessage(Component.text("[debug] rank set " + argString +  " -> ", NamedTextColor.LIGHT_PURPLE)
+                            .append(profile.getFormattedName())
+                        );
+                    } catch (IllegalArgumentException e) {
+                        player.sendMessage("[debug] no rank with name: " + argString);
+                    }
+                    break;
+                }
+                case "discordid": {
+                    Profile profile = Profile.fromUuid(player.getUuid());
+                    profile.setDiscordId(argString);
+                    player.sendMessage("[debug] discordid set -> " + argString);
+                    break;
+                }
+                default: {
+                    break;
+                }
+
+            }
+        }, test, arg);
 
         Command metrics = new Command("metrics");
         metrics.setDefaultExecutor((sender, context) -> {

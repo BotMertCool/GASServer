@@ -35,7 +35,6 @@ public class SyncCommand extends Command {
 
             if (profile.getSyncCode() == null) {
                 profile.setSyncCode(SyncUtil.generateSyncCode());
-                profile.save();
             }
 
             final String syncChannelName = DiscordBot.syncChannelName;

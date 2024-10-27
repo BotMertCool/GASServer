@@ -51,12 +51,17 @@ public class NicknameCommand extends Command {
 
             //😭
 //            if (hasNonAsciiChars(nicknameString)) {
-//                player.sendMessage(Component.text("No special characters."));
+//                player.sendMessage(Component.text("No special characters.", NamedTextColor.RED));
 //                return;
 //            }
 
+            if (nicknameString.trim().isEmpty()) {
+                player.sendMessage(Component.text("Nickname cant be empty.", NamedTextColor.RED));
+                return;
+            }
+
             if (nicknameString.length() > 20) {
-                player.sendMessage(Component.text("Nickname is too long"));
+                player.sendMessage(Component.text("Nickname is too long.", NamedTextColor.RED));
                 return;
             }
 

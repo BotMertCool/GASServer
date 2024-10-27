@@ -12,6 +12,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.bson.Document;
 
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,12 +20,12 @@ public class Profile {
     @Getter private final static Map<UUID, Profile> cache = new ConcurrentHashMap<>();
 
     @Getter private final UUID uuid;
-    @Getter @Setter private String name;
-    @Getter @Setter private String ipAddress;
+    @Getter private String name;
+    @Getter private String ipAddress;
     @Getter private Rank rank;
-    @Getter @Setter private List<Punishment> punishments;
+    @Getter private List<Punishment> punishments;
     @Getter private String discordId;
-    @Getter @Setter private String syncCode;
+    @Getter private String syncCode;
 
     public Profile(UUID uuid) {
         this.uuid = uuid;
@@ -71,18 +72,20 @@ public class Profile {
         document.put("discordId", this.discordId);
         document.put("syncCode", this.syncCode);
 
+        cache.put(this.uuid, this);
         Main.getInstance().getMongoHandler().upsertProfile(this.uuid, document);
     }
 
-    public static boolean profileExists(UUID uuid) {
-        if (Profile.getCache().containsKey(uuid)) {
-            return true;
-        }
-
-        Document document = Main.getInstance().getMongoHandler().getProfile(uuid);
-
-        return document != null;
-    }
+//    doesn't work
+//    public static boolean profileExists(UUID uuid) {
+//        if (Profile.getCache().containsKey(uuid)) {
+//            return true;
+//        }
+//
+//        Document document = Main.getInstance().getMongoHandler().getProfile(uuid);
+//
+//        return document != null;
+//    }
 
     public static Profile fromUuid(UUID uuid) {
         if (Profile.getCache().containsKey(uuid)) {
@@ -90,6 +93,28 @@ public class Profile {
         }
 
         return new Profile(uuid);
+    }
+
+    public static Profile fromPlayer(Player player) {
+        Profile profile = new Profile(player.getUuid());
+
+        // hash this?
+        if (profile.getIpAddress() == null) {
+            InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
+            profile.setIpAddress(address.getHostName());
+        }
+
+        String profileName = profile.getName();
+        if (profileName == null || !profileName.equals(player.getUsername())) {
+            profile.setName(player.getUsername());
+        }
+
+
+        if (profile.getDiscordId() != null) {
+            profile.checkAndUpdateRank();
+        }
+
+        return profile;
     }
 
     public static Profile fromSyncCode(String syncCode) {
@@ -195,5 +220,25 @@ public class Profile {
     public Player getPlayer() {
         // make so can get offline?
         return MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(this.uuid);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        this.save();
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+        this.save();
+    }
+
+    public void setPunishments(List<Punishment> punishments) {
+        this.punishments = punishments;
+        this.save();
+    }
+
+    public void setSyncCode(String syncCode) {
+        this.syncCode = syncCode;
+        this.save();
     }
 }

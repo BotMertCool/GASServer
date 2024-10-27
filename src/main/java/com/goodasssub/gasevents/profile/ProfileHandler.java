@@ -159,22 +159,7 @@ public class ProfileHandler {
             player.sendMessage(instance.getMiniMessage().deserialize(joinMessage));
 
             CompletableFuture.runAsync(() -> {
-                Profile profile = Profile.fromUuid(player.getUuid());
-
-                boolean save = false;
-
-                // hash this?
-                if (profile.getIpAddress() == null) {
-                    InetSocketAddress address = (InetSocketAddress) player.getPlayerConnection().getRemoteAddress();
-                    profile.setIpAddress(address.getHostName());
-                    save = true;
-                }
-
-                String profileName = profile.getName();
-                if (profileName == null || !profileName.equals(player.getUsername())) {
-                    profile.setName(player.getUsername());
-                    save = true;
-                }
+                Profile profile = Profile.fromPlayer(player);
 
                 Component playerName = instance.getMiniMessage()
                     .deserialize(String.format("<%s>", profile.getRank().getColor()))
@@ -183,14 +168,6 @@ public class ProfileHandler {
                 player.setDisplayName(playerName);
 
                 new NametagEntity(player);
-
-                if (profile.getDiscordId() != null) {
-                    profile.checkAndUpdateRank();
-                    save = true;
-                } else {
-//                    player.sendMessage(Component.text("Please sync your minecraft account to your discord account.\n" +
-//                        "You can do this with the /sync command.", NamedTextColor.RED));
-                }
 
                 // ranks inherit?
                 List<Permission> permissions = profile.getRank().getPermissions()
@@ -216,8 +193,6 @@ public class ProfileHandler {
                     player.setRespawnPoint(pos);
                     player.teleport(pos);
                 }
-
-                if (save) profile.save();
             });
 
 

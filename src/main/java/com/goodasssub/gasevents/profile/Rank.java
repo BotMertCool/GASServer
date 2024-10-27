@@ -1,6 +1,8 @@
 package com.goodasssub.gasevents.profile;
 
+import com.goodasssub.gasevents.Main;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 
 import java.util.Arrays;
 import java.util.Comparator;
