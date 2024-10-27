@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.commands.staff;
 
+import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -50,6 +51,33 @@ public class GamemodeCommand extends Command {
 
             executeOthers(sender, mode, finder.find(sender));
         }, gamemode, target);
+
+
+        Command gmc = new Command("gmc");
+        gmc.setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
+            executeSelf(player, GameMode.CREATIVE);
+        });
+
+        Command gma = new Command("gma");
+        gma.setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
+            executeSelf(player, GameMode.ADVENTURE);
+        });
+
+        Command gms = new Command("gms");
+        gms.setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
+            executeSelf(player, GameMode.SURVIVAL);
+        });
+
+        Command gmsp = new Command("gmsp");
+        gmsp.setDefaultExecutor((sender, context) -> {
+            if (!(sender instanceof Player player)) return;
+            executeSelf(player, GameMode.SPECTATOR);
+        });
+
+        Main.getInstance().getCommandManager().register(gmc, gma, gms, gmsp);
     }
 
     private void executeOthers(CommandSender sender, GameMode mode, List<Entity> entities) {
@@ -64,7 +92,7 @@ public class GamemodeCommand extends Command {
             if (!(entity instanceof Player player)) return;
 
             if (player == sender) {
-                executeSelf((Player) sender, mode);
+                executeSelf(sender, mode);
                 return;
             }
 
@@ -84,10 +112,11 @@ public class GamemodeCommand extends Command {
         }
     }
 
-    private void executeSelf(Player sender, GameMode mode) {
+    private void executeSelf(CommandSender sender, GameMode mode) {
         if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
-        sender.setGameMode(mode);
+        if (!(sender instanceof Player player)) return;
 
+        player.setGameMode(mode);
         String gamemode = mode.name().toUpperCase();
 
         Component gamemodeComponent = Component.text("Gamemode: ", NamedTextColor.GOLD)

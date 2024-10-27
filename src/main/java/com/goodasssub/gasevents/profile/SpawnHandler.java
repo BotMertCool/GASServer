@@ -20,10 +20,10 @@ public class SpawnHandler {
     public void setStaffSpawn(Pos staffSpawn) {
         this.staffSpawn = staffSpawn;
         this.refreshSpawns();
-         
+
         Main.getInstance().getConfigManager().getConfig().setStaffSpawnX(staffSpawn.x());
-        Main.getInstance().getConfigManager().getConfig().setStaffSpawnY(staffSpawn.x());
-        Main.getInstance().getConfigManager().getConfig().setStaffSpawnZ(staffSpawn.x());
+        Main.getInstance().getConfigManager().getConfig().setStaffSpawnY(staffSpawn.y());
+        Main.getInstance().getConfigManager().getConfig().setStaffSpawnZ(staffSpawn.z());
         Main.getInstance().getConfigManager().saveConfig();
     }
 
@@ -32,8 +32,8 @@ public class SpawnHandler {
         this.refreshSpawns();
 
         Main.getInstance().getConfigManager().getConfig().setNormalSpawnX(normalSpawn.x());
-        Main.getInstance().getConfigManager().getConfig().setNormalSpawnY(normalSpawn.x());
-        Main.getInstance().getConfigManager().getConfig().setNormalSpawnZ(normalSpawn.x());
+        Main.getInstance().getConfigManager().getConfig().setNormalSpawnY(normalSpawn.y());
+        Main.getInstance().getConfigManager().getConfig().setNormalSpawnZ(normalSpawn.z());
         Main.getInstance().getConfigManager().saveConfig();
     }
 

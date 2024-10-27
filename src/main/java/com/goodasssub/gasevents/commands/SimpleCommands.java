@@ -22,11 +22,9 @@ import net.minestom.server.monitoring.BenchmarkManager;
 import java.util.List;
 
 public class SimpleCommands {
-    private SimpleCommands() {}
-
-    public static void register(CommandManager manager) {
+    public static void register() {
         for (Command command : commands())
-            manager.register(command);
+            Main.getInstance().getCommandManager().register(command);
     }
 
     private static List<Command> commands() {

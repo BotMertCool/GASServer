@@ -60,6 +60,7 @@ public class Main {
     @Getter private final DiscordBot discordBot;
     @Getter private final SpawnHandler spawnHandler;
     @Getter private final AntiCheat antiCheat;
+    @Getter private final CommandManager commandManager;
     @Getter private final InstanceContainer instanceContainer;
     @Getter private final MiniMessage miniMessage;
 
@@ -102,7 +103,7 @@ public class Main {
         MinecraftServer.setCompressionThreshold(0);
         MinecraftServer minecraftServer = MinecraftServer.init();
 
-        CommandManager commandManager = MinecraftServer.getCommandManager();
+        commandManager = MinecraftServer.getCommandManager();
 
         commandManager.register(new GamemodeCommand());
         commandManager.register(new PlayersCommand());
@@ -124,8 +125,7 @@ public class Main {
         commandManager.register(new FillCommand());
         commandManager.register(new SetSpawnCommand());
         commandManager.register(new LightsCommand());
-
-        SimpleCommands.register(commandManager);
+        SimpleCommands.register();
 
         commandManager.setUnknownCommandCallback((sender, command) ->
             sender.sendMessage(Component.text("Unknown command.", NamedTextColor.RED))
@@ -149,7 +149,6 @@ public class Main {
         MinecraftServer.setCompressionThreshold(0);
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
-        var connectionManager = MinecraftServer.getConnectionManager();
 
         eventHandler.addListener(ServerListPingEvent.class, event -> {
             // TODO: add to config, desc, server name, etc
