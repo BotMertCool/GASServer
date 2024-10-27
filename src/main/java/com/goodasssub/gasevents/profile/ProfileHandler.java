@@ -28,7 +28,6 @@ import net.minestom.server.permission.Permission;
 import net.minestom.server.utils.time.TimeUnit;
 import org.bson.Document;
 
-import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,17 +42,17 @@ public class ProfileHandler {
 
     public ProfileHandler(Main instance) {
         this.instance = instance;
-        whitelistHandler = new WhitelistHandler();
+        this.whitelistHandler = new WhitelistHandler();
         
         var eventHandler = MinecraftServer.getGlobalEventHandler();
 
-        eventHandler.addChild(getEventNode(instance.getInstanceContainer()));
+        eventHandler.addChild(this.getEventNode(instance.getInstanceContainer()));
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (c, l) -> c;
 
-        this.getTabFooter();
-        this.getTabHeader();
+        this.setTabFooter();
+        this.setTabHeader();
 
         ScoreboardHandler sidebar = new ScoreboardHandler();
 
@@ -75,22 +74,6 @@ public class ProfileHandler {
 
     public EventNode<?> getEventNode(Instance spawnInstance) {
         var eventNode = EventNode.type("players-node", EventFilter.PLAYER);
-
-        eventNode.addListener(PlayerBlockBreakEvent.class, event -> {
-            //TODO: move to prevention.
-            if (event.getPlayer().hasPermission("*")) return;
-            event.setCancelled(true);
-        });
-        eventNode.addListener(PlayerBlockPlaceEvent.class, event -> {
-            //TODO: move to prevention.
-            if (event.getPlayer().hasPermission("*")) return;
-            event.setCancelled(true);
-        });
-        eventNode.addListener(PlayerSwapItemEvent.class, event -> {
-            //TODO: move to prevention.
-            if (event.getPlayer().hasPermission("*")) return;
-            event.setCancelled(true);
-        });
 
         eventNode.addListener(PlayerSkinInitEvent.class, event -> {
             if (Main.getInstance().getConfigManager().getConfig().getMojangAuth()) return;
@@ -249,7 +232,7 @@ public class ProfileHandler {
         return eventNode;
     }
 
-    public void getTabHeader() {
+    public void setTabHeader() {
         TextComponent.Builder headerBuilder = Component.text();
 
         final List<String> headerStrings = instance.getConfigManager().getConfig().getTabHeader();
@@ -259,7 +242,7 @@ public class ProfileHandler {
         tabHeader = headerBuilder.build();
     }
 
-    public void getTabFooter() {
+    public void setTabFooter() {
         TextComponent.Builder footerBuilder = Component.text();
 
         final List<String> footerStrings = instance.getConfigManager().getConfig().getTabFooter();
