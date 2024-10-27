@@ -24,6 +24,7 @@ public class Config {
     private double normalSpawnX = 0.5f;
     private double normalSpawnY = 0.5f;
     private double normalSpawnZ = 0.5f;
+    private String scoreboardTitle = "<red><bold>YZY CRAFT";
     private List<String> sidebarLines = List.of(
         "<gray><strikethrough>" + " ".repeat(35),
         "<gold>Players: <white>%player%",

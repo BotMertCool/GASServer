@@ -2,6 +2,7 @@ package com.goodasssub.gasevents;
 
 import com.goodasssub.gasevents.anticheat.AntiCheat;
 import com.goodasssub.gasevents.commands.*;
+import com.goodasssub.gasevents.commands.anticheat.AntiCheatCommand;
 import com.goodasssub.gasevents.commands.profile.*;
 import com.goodasssub.gasevents.commands.profile.punishments.*;
 import com.goodasssub.gasevents.commands.profile.whitelist.*;
@@ -9,19 +10,17 @@ import com.goodasssub.gasevents.commands.staff.*;
 import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
+import com.goodasssub.gasevents.prevention.PreventionHandler;
 import com.goodasssub.gasevents.profile.ProfileHandler;
 import com.goodasssub.gasevents.profile.SpawnHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
-import com.goodasssub.gasevents.util.UUIDUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
@@ -125,6 +124,7 @@ public class Main {
         commandManager.register(new FillCommand());
         commandManager.register(new SetSpawnCommand());
         commandManager.register(new LightsCommand());
+        commandManager.register(new AntiCheatCommand());
         SimpleCommands.register();
 
         commandManager.setUnknownCommandCallback((sender, command) ->
@@ -169,7 +169,9 @@ public class Main {
         eventHandler.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
 
         this.profileHandler = new ProfileHandler(this);
-        antiCheat = new AntiCheat();
+        PreventionHandler preventionHandler = new PreventionHandler();
+
+        this.antiCheat = new AntiCheat();
 
         if (configManager.getConfig().getMojangAuth()) {
             MojangAuth.init();

@@ -13,55 +13,61 @@ import java.util.*;
 
 public class ScoreboardHandler {
 
-    private final Sidebar sidebar = new Sidebar(Component.text("YZY CRAFT", NamedTextColor.RED)
-        .decorate(TextDecoration.BOLD));
+    private final Sidebar sidebar;
 
+    private final Map<Integer, Sidebar.ScoreboardLine> lines = new HashMap<>();
 
-    // TODO: Nah..
-    private List<Sidebar.ScoreboardLine> createLines(int playerCount) {
-        List<Sidebar.ScoreboardLine> scoreboardLines = new ArrayList<>();
+    public ScoreboardHandler() {
+        var titleString = Main.getInstance().getConfigManager().getConfig().getScoreboardTitle();
+        var titleComponent = Main.getInstance().getMiniMessage().deserialize(titleString);
 
+        sidebar = new Sidebar(titleComponent);
+    }
+
+    private void updateLines(int playerCount) {
         List<String> stringLines = Main.getInstance().getConfigManager().getConfig().getSidebarLines();
+
+        Set<String> currentLines = new HashSet<>();
+        sidebar.getLines().forEach(line -> currentLines.add(line.getId()));
+
+        for (String lineId : currentLines) {
+            sidebar.removeLine(lineId);
+        }
+
         for (int i = stringLines.size() - 1; i >= 0; i--) {
             String line = stringLines.get(i);
+            int score = stringLines.size() - 1 - i;
 
             line = line.replace("%player%", String.valueOf(playerCount));
             line = line.replace("%tps%", String.format("%.2f", TPSUtil.get()));
 
-            scoreboardLines.add(new Sidebar.ScoreboardLine(
-                (stringLines.size() - 1 - i) + "_line",
-                Main.getInstance().getMiniMessage().deserialize(line),
-                stringLines.size() - 1 - i)
-            );
-        }
+            Component content = Main.getInstance().getMiniMessage().deserialize(line);
 
-        return scoreboardLines;
+            sidebar.createLine(new Sidebar.ScoreboardLine(
+                score + "_line",
+                content,
+                score
+            ));
+        }
     }
 
     public void update(int playerCount) {
         Collection<Player> players = MinecraftServer.getConnectionManager().getOnlinePlayers();
 
-        for (Sidebar.ScoreboardLine line : sidebar.getLines()) {
-            sidebar.removeLine(line.getId());
+        Set<Player> currentPlayers = new HashSet<>(sidebar.getPlayers());
+
+        for (Player player : players) {
+            if (!currentPlayers.contains(player)) {
+                sidebar.addViewer(player);
+            }
         }
 
-        Set<Player> toUpdate = new HashSet<>(players);
-        toUpdate.retainAll(sidebar.getPlayers());
-
-        Set<Player> toRemove = new HashSet<>(sidebar.getPlayers());
-        toRemove.removeAll(toUpdate);
-        for (Player player : toRemove) {
-            sidebar.removeViewer(player);
+        for (Player player : currentPlayers) {
+            if (!players.contains(player)) {
+                sidebar.removeViewer(player);
+            }
         }
 
-        for (Sidebar.ScoreboardLine line : createLines(playerCount)) {
-            sidebar.createLine(line);
-        }
-
-        Set<Player> toAdd = new HashSet<>(players);
-        toAdd.removeAll(sidebar.getPlayers());
-        for (Player player : toAdd) {
-            sidebar.addViewer(player);
-        }
+        updateLines(playerCount);
     }
 }

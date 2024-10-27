@@ -1,11 +1,16 @@
 package com.goodasssub.gasevents.anticheat;
 
+import com.goodasssub.gasevents.Main;
+import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.profile.punishments.Punishment;
 import com.goodasssub.gasevents.profile.punishments.PunishmentType;
 import com.goodasssub.gasevents.util.PlayerUtil;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.mangolise.anticheat.MangoAC;
 import net.mangolise.anticheat.checks.combat.CpsCheck;
 import net.mangolise.anticheat.checks.combat.HitConsistencyCheck;
@@ -16,17 +21,20 @@ import net.mangolise.anticheat.checks.movement.TeleportSpamCheck;
 import net.mangolise.anticheat.checks.other.FastBreakCheck;
 import net.mangolise.anticheat.events.PlayerFlagEvent;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
+import net.minestom.server.utils.time.TimeUnit;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AntiCheat {
     private static final int MAX_PING = 1000;
-    private static final int MAX_FLAGS_BEFORE_BAN = 100;
+    private static final int MAX_FLAGS_BEFORE_BAN = 150;
 
     private final Map<UUID, List<String>> newFlaggedPlayers = new ConcurrentHashMap<>();
-    private final Map<UUID, Integer> playerFlagCount = new ConcurrentHashMap<>();
+    @Getter private final Map<UUID, Integer> playerFlagCount = new ConcurrentHashMap<>();
 
     public AntiCheat() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerFlagEvent.class, (event) -> {
@@ -45,7 +53,7 @@ public class AntiCheat {
                     PunishmentType.BAN,
                     Punishment.ANTICHEAT_UUID,
                     player.getUuid(),
-                    "AntiCheat Ban",
+                    "[AC] Cheating.",
                     Punishment.PERMANENT
                 );
 
@@ -66,23 +74,29 @@ public class AntiCheat {
             ReachCheck.class, BasicSpeedCheck.class, HitConsistencyCheck.class,
             KillauraManualCheck.class, CpsCheck.class, FastBreakCheck.class, TeleportSpamCheck.class
         );
+
         MangoAC.Config config = new MangoAC.Config(true, disabledChecks, List.of());
         MangoAC ac = new MangoAC(config);
         ac.start();
+
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            CompletableFuture.runAsync(() -> {
+                Profile.getCache().entrySet().removeIf(entry -> entry.getValue().getPlayer() == null);
+                Main.getInstance().getAntiCheat().sendFlaggedAlerts();
+            });
+        }).repeat(1, TimeUnit.SERVER_TICK).schedule();
     }
 
     public void sendFlaggedAlerts() {
-        if (newFlaggedPlayers.isEmpty()) return;
-
         List<Player> onlineStaff = PlayerUtil.getOnlineStaff();
         if (onlineStaff.isEmpty()) return;
+        if (newFlaggedPlayers.isEmpty()) return;
 
         Map<UUID, List<String>> flaggedPlayersCopy = new HashMap<>(newFlaggedPlayers);
 
         newFlaggedPlayers.clear();
 
-        TextComponent.Builder alertBatch = Component.text();
-
+        List<Component> alerts = new ArrayList<>();
         for (Map.Entry<UUID, List<String>> entry : flaggedPlayersCopy.entrySet()) {
             var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(entry.getKey());
 
@@ -91,18 +105,20 @@ public class AntiCheat {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 String string = entry.getValue().get(i);
 
-                Component alert = formatAlertMessage(
+                alerts.add(formatAlertMessage(
                     player.getUsername(),
                     string,
                     player.getLatency()
-                );
-
-                alertBatch.append(alert).appendNewline();
+                ));
             }
         }
 
+        JoinConfiguration config = JoinConfiguration.builder()
+            .separator(Component.newline())
+            .build();
+
         for (Player staff : onlineStaff) {
-            staff.sendMessage(alertBatch);
+            staff.sendMessage(Component.join(config, alerts));
         }
     }
 

@@ -1,5 +1,6 @@
 package com.goodasssub.gasevents.profile.punishments;
 
+import com.fasterxml.jackson.databind.util.Named;
 import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.profile.Profile;
 import com.goodasssub.gasevents.util.PlayerUtil;
@@ -179,15 +180,23 @@ public class Punishment {
         }
 
         Component targetDisplayName;
-
-        Player player = connectionManager.getOnlinePlayerByUuid(this.executor);
-        if (player == null || player.getDisplayName() != null) {
+        Player player = connectionManager.getOnlinePlayerByUuid(this.target);
+        if (player == null || player.getDisplayName() == null) {
             targetDisplayName = Component.text(playerName, NamedTextColor.GRAY);
         } else {
             targetDisplayName = player.getDisplayName();
         }
 
         TextComponent.Builder broadcastMsg = Component.text();
+
+        if (this.executor.equals(ANTICHEAT_UUID)) {
+            broadcastMsg.append(Component.text("[AntiCheat] ", NamedTextColor.RED))
+                .append(targetDisplayName)
+                .append(Component.text(" was caught cheating!", NamedTextColor.WHITE));
+
+            Audiences.players().sendMessage(Component.newline().append(broadcastMsg).appendNewline());
+            return;
+        }
 
         String punishmentTypeString = "Error";
 
@@ -223,7 +232,7 @@ public class Punishment {
 
         broadcastMsg.append(Component.text(".", NamedTextColor.WHITE));
         if (!silent) {
-            Audiences.players().sendMessage(broadcastMsg);
+            Audiences.players().sendMessage(Component.newline().append(broadcastMsg).appendNewline());
             return;
         }
 
