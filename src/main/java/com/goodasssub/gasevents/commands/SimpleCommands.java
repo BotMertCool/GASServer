@@ -139,6 +139,14 @@ public class SimpleCommands {
             sender.sendMessage(Component.text("Time set to " + context.get(inputTime), NamedTextColor.GREEN));
         }, inputTime);
 
-        return List.of(stop, ping, metrics, tps, time);
+        Command spawn = new Command("spawn");
+
+        spawn.setDefaultExecutor((sender, context) -> {
+            if (sender instanceof Player player) {
+                player.teleport(player.getRespawnPoint());
+            }
+        });
+
+        return List.of(stop, ping, spawn, debug, metrics, tps, time);
     }
 }

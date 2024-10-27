@@ -168,12 +168,13 @@ public class Profile {
                 .stream()
                 .map(Permission::new)
                 .toList();
-            
+
             for (Permission perm : player.getAllPermissions()) {
                 player.removePermission(perm);
             }
 
             permissions.forEach(player::addPermission);
+            Main.getInstance().getSpawnHandler().refreshSpawns();
         }
 
         this.save();

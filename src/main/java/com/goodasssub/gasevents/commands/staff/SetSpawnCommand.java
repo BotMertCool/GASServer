@@ -4,7 +4,6 @@ import com.goodasssub.gasevents.Main;
 import com.goodasssub.gasevents.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
@@ -12,7 +11,6 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SetSpawnCommand extends Command {
@@ -44,49 +42,32 @@ public class SetSpawnCommand extends Command {
 
         addSyntax((sender, context) -> {
             if (!PlayerUtil.hasPermission(sender, PERMISSION)) return;
+            if (!(sender instanceof Player player)) return;
+
 
             String type = context.get("type");
+            type = type.toLowerCase().trim();
 
             if (!spawnTypes.contains(type)) {
                 Component message = Component.text("Not a valid spawn type.")
                     .appendNewline()
                     .append(Component.text("Types: " + String.join(", ", spawnTypes)));
 
-                sender.sendMessage(message);
+                player.sendMessage(message);
                 return;
             }
 
-            Pos pos = ((Player) sender).getPosition();
-            Collection<Player> players = MinecraftServer.getConnectionManager().getOnlinePlayers();
+            Pos pos = player.getPosition();
 
             if (type.equals("normal")) {
-                Main.getInstance().getConfigManager().getConfig().setNormalSpawnX(pos.x());
-                Main.getInstance().getConfigManager().getConfig().setNormalSpawnY(pos.y());
-                Main.getInstance().getConfigManager().getConfig().setNormalSpawnZ(pos.z());
-
-                for (Player player : players) {
-                    if (player.hasPermission("core.staff")) continue;
-
-                    player.setRespawnPoint(pos);
-                }
-
-                Main.getInstance().getConfigManager().saveConfig();
+                Main.getInstance().getSpawnHandler().setNormalSpawn(pos);
             }
 
             if (type.equals("staff")) {
-                Main.getInstance().getConfigManager().getConfig().setStaffSpawnX(pos.x());
-                Main.getInstance().getConfigManager().getConfig().setStaffSpawnY(pos.y());
-                Main.getInstance().getConfigManager().getConfig().setStaffSpawnZ(pos.z());
-
-                for (Player player : players) {
-                    if (!player.hasPermission("core.staff")) continue;
-
-                    player.setRespawnPoint(pos);
-                }
+                Main.getInstance().getSpawnHandler().setStaffSpawn(pos);
             }
 
-            Main.getInstance().getConfigManager().saveConfig();
+            player.sendMessage(Component.text("Spawn set for \"%s\" at your location.".formatted(type), NamedTextColor.GREEN));
         }, typeArg);
-
     }
 }

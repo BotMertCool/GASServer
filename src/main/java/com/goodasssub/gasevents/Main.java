@@ -10,6 +10,7 @@ import com.goodasssub.gasevents.config.ConfigHandler;
 import com.goodasssub.gasevents.database.MongoHandler;
 import com.goodasssub.gasevents.discordbot.DiscordBot;
 import com.goodasssub.gasevents.profile.ProfileHandler;
+import com.goodasssub.gasevents.profile.SpawnHandler;
 import com.goodasssub.gasevents.util.ShutdownUtil;
 import com.goodasssub.gasevents.util.UUIDUtil;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
@@ -56,6 +58,7 @@ public class Main {
     @Getter private final ConfigHandler configManager;
     @Getter private final ProfileHandler profileHandler;
     @Getter private final DiscordBot discordBot;
+    @Getter private final SpawnHandler spawnHandler;
     @Getter private final AntiCheat antiCheat;
     @Getter private final InstanceContainer instanceContainer;
     @Getter private final MiniMessage miniMessage;
@@ -71,6 +74,22 @@ public class Main {
         miniMessage = MiniMessage.builder().build();
         configManager = new ConfigHandler();
 
+        var c = configManager.getConfig();
+
+        Pos normalSpawn = new Pos(
+            c.getNormalSpawnX(),
+            c.getNormalSpawnY(),
+            c.getNormalSpawnZ()
+        );
+
+        Pos staffSpawn = new Pos(
+            c.getStaffSpawnX(),
+            c.getStaffSpawnY(),
+            c.getStaffSpawnZ()
+        );
+
+        spawnHandler = new SpawnHandler(normalSpawn, staffSpawn);
+
         if (configManager.getConfig().getDiscordToken().equals("token")) {
             // TODO: custom exceptions?
             throw new RuntimeException("Please set the discord bot token, guild id, channel id in the config.json file.");
@@ -82,8 +101,6 @@ public class Main {
 
         MinecraftServer.setCompressionThreshold(0);
         MinecraftServer minecraftServer = MinecraftServer.init();
-
-
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
