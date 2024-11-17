@@ -109,6 +109,7 @@ public class Main {
         commandManager.register(new SyncCommand());
         commandManager.register(new NicknameCommand());
         commandManager.register(new TeleportCommand());
+        commandManager.register(new BringCommand());
         commandManager.register(new WhitelistCommand());
         commandManager.register(new ThruCommand());
         commandManager.register(new FlyCommand());
